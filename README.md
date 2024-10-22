@@ -9,7 +9,6 @@ I am an IT professional with four years of experience as a Helpdesk Service Tech
 My journey in IT has led me to develop an interest for cybersecurity, and I am now excited to transition into this field, specifically aiming to join a Security Operations Center (SOC) as a Tier 1 Analyst.
 
 ## Skills
-[Provide skills and associated project. Make sure to hyperlink the project - Remove this afterwards]]
 
 | Skill                                         | Associated Project         |
 |-----------------------------------------------|----------------------------|
