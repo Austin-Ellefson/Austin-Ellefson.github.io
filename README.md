@@ -54,5 +54,5 @@ My journey in IT has led me to develop an interest for cybersecurity, and I am n
 </div>
 
 ## Projects
-- Detection Lab
+- Home Network Lab Cisco Packet Tracer
 - SOC Automation Project
