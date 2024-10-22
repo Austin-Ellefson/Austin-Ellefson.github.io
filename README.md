@@ -14,7 +14,7 @@ My journey in IT has led me to develop an interest for cybersecurity, and I am n
 
 | Skill                                         | Associated Project         |
 |-----------------------------------------------|----------------------------|
-| Built a virtual home network         | <a href="https://google.com">Detection Lab</a>|
+| Networking Foundation        | <a href="https://google.com">Detection Lab</a>|
 | Network Traffic Monitoring and Attack Detection | <a href="https://google.com">Detection Lab</a>|
 | Security Automation with Shuffle SOAR         | SOC Automation Lab|
 | Incident Response Planning and Execution      | SOC Automation Lab|
