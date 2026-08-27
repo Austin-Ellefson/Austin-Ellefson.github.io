@@ -1,6 +1,6 @@
 Hello, I’m Austin
 
-I am an IT professional with four years of experience as a Helpdesk Service Technician, driven by a passion for technology, problem-solving, and cybersecurity. My professional IT experience combined with hands-on security labs has allowed me to develop practical skills in log analysis, incident investigation, network security, and threat detection.
+I am an IT professional with six years of experience as a Helpdesk Service Technician, driven by a passion for technology, problem-solving, and cybersecurity. My professional IT experience combined with hands-on security labs has allowed me to develop practical skills in log analysis, incident investigation, network security, and threat detection.
 
 Objective
 
