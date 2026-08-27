@@ -8,18 +8,17 @@ My experience in IT has led me to develop a strong interest in cybersecurity. I 
 
 Skills
 
-Skill	Associated Project
-Windows Event Log Analysis	TryHackMe Benign SOC Investigation
-Splunk Log Analysis & Threat Hunting	TryHackMe Benign SOC Investigation
-Process & Command-Line Analysis	TryHackMe Benign SOC Investigation
-LOLBin & Suspicious Process Identification	TryHackMe Benign SOC Investigation
-Incident Timeline Reconstruction	TryHackMe Benign SOC Investigation
-Networking Fundamentals	Home Network Lab
-Network Traffic Monitoring & Attack Detection	Detection Lab
-Security Automation with Shuffle SOAR	SOC Automation Lab
-Incident Response Planning & Execution	SOC Automation Lab
-Case Management with TheHive	SOC Automation Lab
-Scripting & Automation for Threat Mitigation	SOC Automation Lab
+| Skill                                          | Experience / Project                                                       |
+| :--------------------------------------------- | :------------------------------------------------------------------------- |
+| 🔎 **SIEM & Log Analysis**                     | [TryHackMe Benign SOC Investigation](SOC-Investigations/TryHackMe-Benign/) |
+| 🪟 **Windows Event Log Analysis**              | [TryHackMe Benign SOC Investigation](SOC-Investigations/TryHackMe-Benign/) |
+| 🎯 **Threat Hunting & Incident Investigation** | [TryHackMe Benign SOC Investigation](SOC-Investigations/TryHackMe-Benign/) |
+| 🌐 **Network Traffic Analysis**                | Detection Lab                                                              |
+| 🛡️ **Incident Response**                      | SOC Automation Lab                                                         |
+| ⚙️ **Security Automation / SOAR**              | SOC Automation Lab                                                         |
+| 📋 **Case Management**                         | TheHive / SOC Automation Lab                                               |
+| 💻 **Networking Fundamentals**                 | Home Network Lab – Cisco Packet Tracer                                     |
+
 
 Tools
 
