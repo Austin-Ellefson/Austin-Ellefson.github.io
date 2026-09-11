@@ -1,14 +1,17 @@
-Investigated a mislabeled resource group in azure.
+# Investigating an Azure Governance Failure
 
-A junior intern was given temporary Contributor access to deploy a test environment in the Mad Hat Labs Azure subscription but created the resources without following the organization’s governance standards.
-As the on-call Azure engineer with Reader access, I investigated the environment to determine what was deployed, identify which governance controls failed or were bypassed, and document the resulting risks and evidence.
+## Scenario
 
--  Microsoft Azure
--  Live multi-user Azure training tenant
--  Reader access
--  Azure Resource Groups, Virtual Machines, Storage Accounts, Virtual Networks, and Network Security Groups
--  Azure Policy, resource tagging, naming standards, security configuration, and resource organization
--  Azure Portal, Activity Log, and Azure Policy
+A junior intern was given temporary Contributor access to deploy a test environment in the Mad Hat Labs Azure subscription. The resources were deployed without following the organization's governance standards, so I investigated the environment with Reader access to determine what was created, trace how it was deployed, and identify why Azure Policy failed to prevent the non-compliant deployment.
+
+## Environment
+
+- **Platform:** Microsoft Azure
+- **Environment:** Live multi-user Azure training tenant
+- **Access Level:** Reader
+- **Services Investigated:** Azure Resource Groups and deployed Azure resources
+- **Governance Controls:** Azure Policy, resource tagging, and naming standards
+- **Tools Used:** Azure Portal, Azure Resource Manager deployment history, and Azure Policy
 
 ## Investigation
 
