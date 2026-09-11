@@ -11,7 +11,7 @@ As the on-call Azure engineer with Reader access, I investigated the environment
 -  Azure Portal, Activity Log, and Azure Policy
 
 ## Investigation
-The core. Numbered steps IN YOUR OWN WORDS: what you looked at, what you found, what you concluded at each step. 6 to 12 screenshots of meaningful moments (portal views, query results, before/after).
+
 1. I opened the portal and began looking at resource groups to see if any looked out of place. Towards the bottom I found my culprit. 
 ![Resources deployed by the intern](Screenshots/S1.png)
 
