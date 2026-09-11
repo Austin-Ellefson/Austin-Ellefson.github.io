@@ -21,6 +21,10 @@ As the on-call Azure engineer with Reader access, I investigated the environment
    I reviewed the deployment details, including its name, timestamp, parameters, and deployment status.
    The deployment name provided additional evidence connecting the resource to the intern and helped establish when the environment was created.
    ![Deployments](Screenshots/S3.png)
+4. After confirming how the resource was deployed, I investigated why Azure Policy did not prevent the improperly named resource from being created.
+   I found that the naming convention policy was active and correctly identified the resource as non-compliant, but it had still allowed the deployment to succeed. I reviewed the policy assignment and found that its **Effect** was set to `Audit` instead of `Deny`.
+ This explained the governance failure: the policy was configured to detect and report naming violations rather than block them, allowing the intern's non-compliant resource to be created.
+   ![Naming Policy Effect Set to Audit](Screenshots/S4.png)
 
 ## What broke / what surprised me
 The most credible section in the document. Dead ends, wrong guesses, the thing that took an hour. Employers know real work is messy. This section separates you from certificate collectors.
