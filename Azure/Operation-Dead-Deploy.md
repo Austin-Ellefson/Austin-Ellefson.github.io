@@ -16,7 +16,11 @@ As the on-call Azure engineer with Reader access, I investigated the environment
    ![Resource Groups](Screenshots/S1.png)
 3. After this I opened the RG and saw that it had only one resource deployed. I opened that and inspected the tags. I found that its owner was the intern.
   ![tags](Screenshots/S2.png)
-   
+3. I wanted to determine how the intern's resource was originally created, so I returned to the resource group and reviewed its deployment history.
+   Since Azure Resource Manager records deployments made against a resource group, I used the Deployments blade to trace the resource back to the deployment that created it.
+   I reviewed the deployment details, including its name, timestamp, parameters, and deployment status.
+   The deployment name provided additional evidence connecting the resource to the intern and helped establish when the environment was created.
+   ![Deployments](Screenshots/S3)
 
 ## What broke / what surprised me
 The most credible section in the document. Dead ends, wrong guesses, the thing that took an hour. Employers know real work is messy. This section separates you from certificate collectors.
