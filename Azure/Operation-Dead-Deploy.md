@@ -20,7 +20,7 @@ As the on-call Azure engineer with Reader access, I investigated the environment
    Since Azure Resource Manager records deployments made against a resource group, I used the Deployments blade to trace the resource back to the deployment that created it.
    I reviewed the deployment details, including its name, timestamp, parameters, and deployment status.
    The deployment name provided additional evidence connecting the resource to the intern and helped establish when the environment was created.
-   ![Deployments](Screenshots/S3)
+   ![Deployments](Screenshots/S3.png)
 
 ## What broke / what surprised me
 The most credible section in the document. Dead ends, wrong guesses, the thing that took an hour. Employers know real work is messy. This section separates you from certificate collectors.
