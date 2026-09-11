@@ -27,10 +27,20 @@ As the on-call Azure engineer with Reader access, I investigated the environment
    ![Naming Policy Effect Set to Audit](Screenshots/S4.png)
 
 ## What broke / what surprised me
-The most credible section in the document. Dead ends, wrong guesses, the thing that took an hour. Employers know real work is messy. This section separates you from certificate collectors.
+Honestly the only thing that tripped me up was in the beginning I did not set enough rows to see the misnamed resource group
 
 ## Findings and recommendations
-What you determined, plus 2 or 3 recommendations as if you were reporting to the resource owner.
+
+The investigation determined that the intern was able to deploy a resource that did not follow Mad Hat Labs' naming standards because the naming convention policy was configured with an `Audit` effect. The policy successfully detected the violation and marked the resource as non-compliant, but it was not configured to prevent the deployment.
+
+- **Change the naming policy effect from `Audit` to `Deny`** after validating the policy against existing resources. This would prevent future resources that violate the naming convention from being deployed.
+- **Require appropriate resource tags** such as owner, environment, and purpose so resources can be quickly traced back to the person or project responsible for them.
+- **Review temporary Contributor access and deployment procedures** to ensure users understand governance requirements before being given permission to deploy resources.
 
 ## What I learned
-3 to 5 bullets. At least one technical, one "what I'd do differently."
+
+- Azure Policy can identify a resource as non-compliant without necessarily preventing that resource from being created.
+- The `Audit` policy effect records policy violations, while `Deny` can block a deployment that does not meet the policy requirements.
+- Azure Resource Manager deployment history can be used to trace how and when resources were deployed.
+- Tags and naming standards are useful during an investigation because they can help identify a resource's owner and purpose.
+- **What I'd do differently:** I would check the policy assignment and its effect earlier in the investigation instead of assuming that an active policy was configured to enforce the standard.
