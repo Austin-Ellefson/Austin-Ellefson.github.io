@@ -19,6 +19,13 @@ Following the lead from Carl's ownership of `Mad-Hat-Legacy-Sync-Service`, I ope
 I found a single client secret whose **Description** contained the flag. The **Expires** date was also set nearly a century into the future, indicating that the credential had been created for long-term persistence.
 This showed how the attacker used Carl's Owner access to add a new credential to the application and gain access through the application's service principal rather than continuing to authenticate as Carl.
 ![Client secret found on the legacy application](Screenshots/SS2.png)
+### 3. Discovered a Rogue Application Added as an Owner
+I reviewed the **API permissions** on `Mad-Hat-Legacy-Sync-Service` and confirmed that it had Microsoft Graph application permissions with **admin consent** already granted.
+I then checked the application's **Owners** and found a service principal named `Mad-Hat-Labs-App`. This was tied to a separate app registration created by the attacker and had been added as an owner of the legacy application.
+I opened `Mad-Hat-Labs-App` under **App registrations** and reviewed its **Branding & properties**, where I found an internal note containing the next flag.
+This showed that the attacker had established another persistence path by giving their newly created application ownership over `Mad-Hat-Legacy-Sync-Service`.
+![Rogue Mad-Hat-Labs-App registration and internal note](Screenshots/SS3.png)
+
 ## What broke / what surprised me
 The most credible section in the document. Dead ends, wrong guesses, the thing that took an hour. Employers know real work is messy. This section separates you from certificate collectors.
 
