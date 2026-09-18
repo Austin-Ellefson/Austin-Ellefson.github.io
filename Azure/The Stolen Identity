@@ -1,0 +1,20 @@
+# The Stolen Identity
+
+## Scenario
+An unauthorized user gained access to the Mad Hat Labs tenant sometime within the previous 24 hours, with no security alerts indicating an obvious compromise.
+The investigation focused on the identity plane to determine how the attacker gained access, which identity or application was involved, and what access they may have retained inside the tenant.
+
+## Environment
+One list: platform, services, tools, access level. Honest framing: "live multi-user Azure training tenant, Reader access."
+
+## Investigation
+The core. Numbered steps IN YOUR OWN WORDS: what you looked at, what you found, what you concluded at each step. 6 to 12 screenshots of meaningful moments (portal views, query results, before/after).
+
+## What broke / what surprised me
+The most credible section in the document. Dead ends, wrong guesses, the thing that took an hour. Employers know real work is messy. This section separates you from certificate collectors.
+
+## Findings and recommendations
+What you determined, plus 2 or 3 recommendations as if you were reporting to the resource owner.
+
+## What I learned
+3 to 5 bullets. At least one technical, one "what I'd do differently."
