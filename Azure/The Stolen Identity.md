@@ -30,6 +30,12 @@ I continued reviewing `Mad-Hat-Legacy-Sync-Service` and opened the **Expose an A
 Under **Scopes defined by this API**, I found a custom scope created by the attacker. The **User consent display name** contained the next flag.
 This revealed another persistence mechanism that could be used with the attacker's rogue application if the original client secret was discovered and rotated.
 ![Custom API scope configured on the legacy application](Screenshots/SS4.png)
+### 5. Traced the OAuth Phishing Setup
+I opened the **Authentication** blade of the rogue `Mad-Hat-Labs-App` and reviewed its configured **Redirect URIs**.
+I found two redirect URIs: one appeared to be a normal local-development address, while the other pointed to an attacker-controlled domain. The suspicious URI contained a URL-encoded flag within its query string.
+After decoding the value, I confirmed that the rogue application was configured to receive authorization codes from users who consented to the attacker's OAuth request.
+This completed the persistence chain by showing how the rogue app, exposed API scope, and malicious redirect URI could be combined to collect tokens from users.
+![Suspicious redirect URI configured on the rogue application](Screenshots/SS5.png)
 
 ## What broke / what surprised me
 The most credible section in the document. Dead ends, wrong guesses, the thing that took an hour. Employers know real work is messy. This section separates you from certificate collectors.
