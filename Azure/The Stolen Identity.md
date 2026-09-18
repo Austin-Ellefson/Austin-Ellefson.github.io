@@ -25,6 +25,11 @@ I then checked the application's **Owners** and found a service principal named 
 I opened `Mad-Hat-Labs-App` under **App registrations** and reviewed its **Branding & properties**, where I found an internal note containing the next flag.
 This showed that the attacker had established another persistence path by giving their newly created application ownership over `Mad-Hat-Legacy-Sync-Service`.
 ![Rogue Mad-Hat-Labs-App registration and internal note](Screenshots/SS3.png)
+### 4. Found a Backup Persistence Mechanism
+I continued reviewing `Mad-Hat-Legacy-Sync-Service` and opened the **Expose an API** blade to check for any custom scopes configured on the application.
+Under **Scopes defined by this API**, I found a custom scope created by the attacker. The **User consent display name** contained the next flag.
+This revealed another persistence mechanism that could be used with the attacker's rogue application if the original client secret was discovered and rotated.
+![Custom API scope configured on the legacy application](Screenshots/SS4.png)
 
 ## What broke / what surprised me
 The most credible section in the document. Dead ends, wrong guesses, the thing that took an hour. Employers know real work is messy. This section separates you from certificate collectors.
