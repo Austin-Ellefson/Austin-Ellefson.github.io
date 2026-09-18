@@ -13,7 +13,7 @@ One list: platform, services, tools, access level. Honest framing: "live multi-u
 I reviewed the **App registrations** in Microsoft Entra ID and found an application named `Mad-Hat-Legacy-Sync-Service`.
 While reviewing the application's **Branding & properties**, I found an internal note referencing **Carl from Accounting**.
 This gave me my first lead and pointed me toward Carl's connection to the application.
-![Mad-Hat-Legacy-Sync-Service properties](Azure/Screenshots/SS1.png)
+![Mad-Hat-Legacy-Sync-Service properties](Screenshots/SS1.png)
 ## What broke / what surprised me
 The most credible section in the document. Dead ends, wrong guesses, the thing that took an hour. Employers know real work is messy. This section separates you from certificate collectors.
 
