@@ -5,7 +5,12 @@ An unauthorized user gained access to the Mad Hat Labs tenant sometime within th
 The investigation focused on the identity plane to determine how the attacker gained access, which identity or application was involved, and what access they may have retained inside the tenant.
 
 ## Environment
-One list: platform, services, tools, access level. Honest framing: "live multi-user Azure training tenant, Reader access."
+
+- **Platform:** Microsoft Azure / Microsoft Entra ID
+- **Environment:** Live multi-user Mad Hat Labs Azure training tenant
+- **Services:** Entra ID, App registrations, Enterprise applications, Microsoft Graph
+- **Tools:** Azure Portal
+- **Access level:** Limited tenant access within a shared training environment
 
 ## Investigation
 
