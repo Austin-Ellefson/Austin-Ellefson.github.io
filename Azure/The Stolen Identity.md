@@ -37,11 +37,18 @@ After decoding the value, I confirmed that the rogue application was configured 
 This completed the persistence chain by showing how the rogue app, exposed API scope, and malicious redirect URI could be combined to collect tokens from users.
 ![Suspicious redirect URI configured on the rogue application](Screenshots/SS5.png)
 
-## What broke / what surprised me
-The most credible section in the document. Dead ends, wrong guesses, the thing that took an hour. Employers know real work is messy. This section separates you from certificate collectors.
-
+## What broke / What surprised me
+The biggest surprise was how many persistence options were available through a single compromised identity. My first assumption was that rotating Carl's password and removing the suspicious client secret would cut off the attacker's access.
+As I continued investigating, I found that the attacker had built multiple layers of persistence into the application environment. The rogue app registration, ownership relationship, custom API scope, and redirect URI meant that simply resetting the original credentials would not address everything the attacker had changed.
+I also did not initially realize how important app ownership was. Carl did not need a highly privileged Entra ID role for his account to be useful to the attacker; his ownership of a privileged legacy application was enough to start the escalation.
 ## Findings and recommendations
-What you determined, plus 2 or 3 recommendations as if you were reporting to the resource owner.
-
+I determined that the attacker used Carl's access to take control of `Mad-Hat-Legacy-Sync-Service` and establish multiple persistence mechanisms. These included a long-lived client secret, the rogue `Mad-Hat-Labs-App` registration, ownership of the legacy application, a custom API scope, and a suspicious OAuth redirect URI.
+I would recommend:
+- **Review and remove unnecessary application owners**, especially user accounts attached to legacy or highly privileged applications.
+- **Audit app registrations and credentials regularly** for long-lived client secrets, unknown service principals, custom API scopes, and suspicious redirect URIs.
+- **Restrict application registration and user consent where appropriate** and review existing OAuth grants so compromised users cannot easily introduce rogue applications or persistent delegated access.
 ## What I learned
-3 to 5 bullets. At least one technical, one "what I'd do differently."
+- An account does not need a privileged directory role to create a serious security problem if it owns an application with powerful permissions.
+- Client secrets are only one part of application persistence. Owners, service principals, API scopes, redirect URIs, and OAuth grants also need to be investigated.
+- OAuth abuse can allow an attacker to obtain access through legitimate Entra ID authorization flows instead of repeatedly signing in with stolen user credentials.
+- I initially focused too heavily on the compromised user. In a future investigation, I would pivot earlier from the identity into every application, service principal, credential, and OAuth relationship that identity controls.
