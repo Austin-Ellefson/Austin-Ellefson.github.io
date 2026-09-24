@@ -110,7 +110,7 @@ The privilege pattern identified here gave me a starting point for the next phas
 
 #### Role Assignment Export
 
-![Azure IAM Role Assignment Export](images/iam-role-assignment-export.png)
+![Azure IAM Role Assignment Export](Screenshots/PA1.png)
 
 *The role-assignment export provided a subscription-level view of active Azure RBAC assignments. Sensitive lab values, challenge flags, assignment descriptions, and identifiers have been redacted.*
 
