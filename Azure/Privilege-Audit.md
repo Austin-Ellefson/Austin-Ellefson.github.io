@@ -118,7 +118,106 @@ The privilege pattern identified here gave me a starting point for the next phas
 
 ## 2. Auditing Role Assignments with Azure CLI
 
-`[TO BE COMPLETED]`
+### Method: Azure CLI
+
+After establishing an access baseline with the IAM export, I used **Azure CLI** to inspect the RBAC assignments from the command line.
+
+The CLI provides access to the same underlying role-assignment data, but in a structured format that can be filtered, scripted, and repeated. This makes it more useful for recurring audits than manually clicking through individual IAM blades.
+
+For this portion of the audit, I queried the production resource group.
+
+### Command Used
+
+```bash
+az role assignment list --resource-group rg-madhatlabs-prod-cus
+```
+
+---
+
+### What I Looked For
+
+I reviewed the returned role assignments and compared them against the IAM export from the previous step.
+
+I focused on:
+
+- Principal IDs associated with each assignment
+- Role definitions
+- Assignment scope
+- Principal type
+- Identities that could not be resolved
+- Differences between the CLI output and the IAM export
+
+---
+
+### What I Found
+
+Each RBAC assignment contained a `principalId`, which is the GUID Azure uses to associate the role assignment with an identity.
+
+However, my operative account did not have enough Microsoft Entra permissions to resolve those GUIDs into identity names. Because of this, the `principalName` field was blank in the CLI output.
+
+A blank `principalName` alone therefore did **not** prove that an account had been deleted.
+
+To investigate further, I cross-referenced the assignments returned by the CLI with the IAM role-assignment export from the previous step.
+
+This comparison revealed one assignment associated with a principal that no longer existed.
+
+The identity had been deleted, but its Azure RBAC assignment remained.
+
+This created an **orphaned role assignment**.
+
+> **Note:** The orphaned principal ID and challenge-specific values have been intentionally redacted from this write-up.
+
+---
+
+### Why the Orphaned Assignment Matters
+
+Deleting an identity does not automatically guarantee that every authorization object associated with it has been cleaned up.
+
+In this case, Azure still contained an RBAC assignment for an identity that could no longer be properly identified or accounted for.
+
+From an access-governance perspective, stale assignments create unnecessary authorization state and make access reviews less reliable. Administrators should be able to explain **who or what holds every permission and why that access is required**.
+
+If an assignment points to an identity that no longer exists, it should be investigated and removed rather than left behind as unused permission data.
+
+---
+
+### Blind Spot
+
+Azure CLI provided structured and repeatable access to the RBAC data, but it still had limitations.
+
+My account could retrieve the role assignments but could not resolve their principal IDs into Microsoft Entra identity names. I therefore needed to cross-reference the CLI results with the IAM export to determine which assignment belonged to the deleted identity.
+
+The command was also scoped to a single resource group. Repeating the same process manually across every resource group and scope would become inefficient in a larger Azure environment.
+
+---
+
+### Conclusion
+
+Azure CLI gave me a more repeatable way to enumerate RBAC assignments and inspect the underlying data than manually navigating the Azure portal.
+
+By comparing the CLI results against the IAM export, I identified an **orphaned role assignment belonging to a deleted principal**.
+
+The key lesson from this method was that an access audit should not only ask:
+
+> **"What permissions exist?"**
+
+It should also ask:
+
+> **"Does the identity associated with each permission still exist and still require that access?"**
+
+CLI worked well for investigating a specific scope, but querying scopes individually would not scale efficiently across an entire Azure environment.
+
+For the next phase of the audit, I used **Azure Resource Graph and KQL** to examine role assignments across multiple scopes in a single query.
+
+---
+
+### Evidence
+
+#### Orphaned Role Assignment
+
+![Azure CLI orphaned role assignment](Screenshots/PA2.png)
+
+*Azure CLI role-assignment data showing an unresolved principal. The principal ID, subscription ID, role-assignment identifiers, and challenge-specific description have been redacted.*
 
 ---
 
