@@ -215,7 +215,7 @@ For the next phase of the audit, I used **Azure Resource Graph and KQL** to exam
 
 #### Orphaned Role Assignment
 
-![Azure CLI orphaned role assignment](Screenshots/PA2.png)
+![Azure CLI orphaned role assignment](Screenshots/PA02.png)
 
 *Azure CLI role-assignment data showing an unresolved principal. The principal ID, subscription ID, role-assignment identifiers, and challenge-specific description have been redacted.*
 
