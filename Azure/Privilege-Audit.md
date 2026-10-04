@@ -221,9 +221,128 @@ For the next phase of the audit, I used **Azure Resource Graph and KQL** to exam
 
 ---
 
-## 3. Expanding the Audit with Azure Resource Graph
+## 3. Sweeping Role Assignments with Azure Resource Graph
 
-`[TO BE COMPLETED]`
+### Method: Azure Resource Graph / KQL
+
+After using Azure CLI to investigate role assignments within a specific resource group, I moved to **Azure Resource Graph Explorer** to determine how the same type of audit could be performed across a larger Azure environment.
+
+The IAM blade and my CLI command were both focused on individual scopes. Resource Graph instead provides a way to query Azure Resource Manager data across accessible subscriptions and resources using **Kusto Query Language (KQL)**.
+
+For this portion of the audit, I used the orphaned principal ID identified during the previous step and searched the `authorizationresources` table for any remaining role assignments associated with it.
+
+### KQL Query
+
+```kusto
+authorizationresources
+| where type =~ 'microsoft.authorization/roleassignments'
+| extend principalId = tostring(properties.principalId)
+| extend description = properties.description
+| where principalId == '<REDACTED-ORPHANED-PRINCIPAL-ID>'
+| project name,
+          principalId,
+          principalType = properties.principalType,
+          scope = properties.scope,
+          description
+```
+
+> **Note:** The orphaned principal ID has been intentionally removed from the published query.
+
+---
+
+### What I Looked For
+
+The purpose of the query was to search for role assignments associated with the orphaned identity discovered during the CLI investigation.
+
+I focused on:
+
+- Role assignments across accessible Azure scopes
+- Assignments associated with the orphaned principal ID
+- Assignment scope
+- Principal type
+- Stale authorization data
+- Whether the same principal appeared at multiple scopes
+
+Instead of manually checking individual IAM blades or repeatedly running CLI commands against different resource groups, Resource Graph provided a central query interface for performing the search.
+
+---
+
+### What I Found
+
+When I filtered Resource Graph specifically for the orphaned principal ID, the query returned no results.
+
+This did **not** mean the assignment had disappeared.
+
+My operative account did not have sufficient permissions to retrieve the specific authorization data required by that query.
+
+To verify that Resource Graph itself was working, I removed the principal-specific filter and queried the broader `authorizationresources` dataset that my account could access.
+
+This demonstrated an important distinction during the audit:
+
+> **No query results do not automatically mean no matching resources exist.**
+
+The permissions of the account performing the audit determine what Resource Graph can return.
+
+The orphaned assignment had already been confirmed through the previous IAM and CLI investigation. Resource Graph demonstrated how the same principal ID could be searched across a much larger Azure environment when the auditor has the necessary permissions.
+
+---
+
+### Why Resource Graph Matters
+
+The main advantage of Resource Graph was **scale**.
+
+Using the portal, I would need to inspect IAM at individual scopes. Using the CLI command from the previous step, I would need to query resource groups individually or build additional scripting around the process.
+
+Resource Graph allowed the audit question to be expressed as a KQL query instead:
+
+> **"Where does this principal still have role assignments?"**
+
+With appropriate permissions, the same approach could be expanded to search across subscriptions for stale principals, repeated privileged assignments, unusual scopes, or other RBAC patterns.
+
+The query can also be modified and reused, making it more practical for larger access reviews than manually navigating through Azure resources.
+
+---
+
+### Blind Spot
+
+Resource Graph solved the scope problem, but it introduced another important limitation.
+
+The `authorizationresources` data used during this audit represented **active Azure RBAC assignments**.
+
+It did not provide the complete picture of identities that were **eligible** to activate privileged roles through Privileged Identity Management.
+
+This means an account could potentially obtain privileged access through PIM without appearing as a currently active assignment in this portion of the audit.
+
+Resource Graph therefore answered:
+
+> **"What active role assignments exist across the environment?"**
+
+but not:
+
+> **"Who is eligible to obtain privileged access?"**
+
+That required a different data source.
+
+---
+
+### Conclusion
+
+Azure Resource Graph showed how an RBAC audit could move from investigating individual scopes to searching authorization data across a much larger Azure environment.
+
+The biggest lesson from this method was that **audit coverage depends on both the query and the permissions of the auditor running it**. An empty result should be interpreted in the context of the account's visibility rather than automatically treated as proof that an assignment does not exist.
+
+At this point, the audit methods had progressed from:
+
+**IAM → visual access baseline**
+
+**Azure CLI → structured investigation of a specific scope**
+
+**Resource Graph → scalable KQL-based search across Azure**
+
+However, all three methods were focused on **active access**.
+
+For the next phase of the audit, I used **Privileged Identity Management (PIM)** to investigate the other side of privileged access: identities that may not currently hold a privileged role but are eligible to activate one.
+
 
 ---
 
