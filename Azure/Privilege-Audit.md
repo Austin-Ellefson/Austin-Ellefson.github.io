@@ -346,9 +346,173 @@ For the next phase of the audit, I used **Privileged Identity Management (PIM)**
 
 ---
 
-## 4. Reviewing Eligible Privilege with PIM
+## 4. Auditing Eligible vs. Active Privilege with PIM
 
-`[TO BE COMPLETED]`
+### Method: Privileged Identity Management (PIM)
+
+The first three methods focused primarily on **active Azure RBAC assignments**.
+
+That answered an important question:
+
+> **"Who has access right now?"**
+
+However, it did not completely answer:
+
+> **"Who is capable of obtaining privileged access?"**
+
+To investigate that side of the environment, I used **Microsoft Entra Privileged Identity Management (PIM)**.
+
+PIM distinguishes between users who have a role assigned permanently and users who are only **eligible** for a role and must activate it when needed.
+
+---
+
+### What I Did
+
+In the Azure portal, I opened **Privileged Identity Management** and navigated to:
+
+**PIM → Azure resources → Assignments**
+
+My operative account did not have enough access to perform a complete subscription-level PIM review.
+
+Instead, I selected a resource group within my permitted scope and reviewed its:
+
+- Eligible assignments
+- Active assignments
+- Expired assignments
+- Assignment type
+- Assignment duration
+- Role
+- Scope
+
+I also reviewed the available **Export** functionality, which allows PIM assignment information to be exported for further analysis.
+
+With sufficient subscription-level permissions, the same process could be used to export role-assignment details for the subscription and resources beneath it.
+
+---
+
+### What I Looked For
+
+I focused on the difference between **standing privilege** and **eligible privilege**.
+
+Specifically, I looked for:
+
+- Highly privileged roles
+- Permanently assigned privileged access
+- PIM-eligible assignments
+- Direct versus inherited assignments
+- Assignment duration
+- Privilege that could potentially be moved from permanent access to temporary activation
+- Previous role activations that could provide context about how privileged access was being used
+
+---
+
+### What I Found
+
+PIM exposed information that the previous audit methods did not provide.
+
+The Assignments view showed whether access was **eligible or active**, along with information about how the assignment had been granted and its duration.
+
+During the review, I observed privileged roles configured as **permanent assignments**.
+
+This was significant because a permanent privileged assignment represents standing access: the identity retains those permissions continuously rather than receiving them only when the privileges are required.
+
+The presence of a permanent assignment does not automatically mean that the configuration is incorrect. Some identities or workloads may legitimately require standing access.
+
+However, privileged user access should be reviewed to determine whether permanent assignment is actually necessary or whether the role could instead be made **PIM-eligible**.
+
+---
+
+### Why Standing Privilege Matters
+
+Standing privileged access increases the amount of time powerful permissions are available to an account.
+
+If a privileged account is compromised while the role is permanently assigned, the attacker may immediately inherit those permissions.
+
+PIM can reduce this exposure by allowing privileged roles to remain inactive until they are required.
+
+Depending on organizational policy, activation can also require controls such as:
+
+- Multi-factor authentication
+- Business justification
+- Approval
+- Time-limited activation
+
+This changes privileged access from:
+
+> **"This account always has this permission."**
+
+to:
+
+> **"This account can obtain this permission when there is a legitimate reason to use it."**
+
+For an access audit, that distinction is important.
+
+---
+
+### Activation History
+
+PIM also provides audit information showing how privileged access has been activated and used over time.
+
+This allows an auditor to investigate questions such as:
+
+- Who activated a privileged role?
+- Which role was activated?
+- When was it activated?
+- How long was the access available?
+- Was justification provided?
+- Does the activation pattern match the user's expected responsibilities?
+
+This provides context that a normal list of RBAC assignments cannot provide.
+
+---
+
+### Blind Spot
+
+PIM solved the visibility problem around **eligible privilege**, but it was still not a complete replacement for the previous audit methods.
+
+PIM is strongest when investigating privileged access that is actually being managed through PIM.
+
+Standing RBAC assignments that were never brought under PIM still need to be discovered through methods such as IAM, Azure CLI, or Resource Graph.
+
+My own visibility was also limited by the permissions of my operative account. I could audit PIM assignments for resources within my permitted scope, but I could not perform the same complete review across the entire subscription.
+
+This reinforced a pattern I encountered throughout the audit:
+
+> **The quality of an access review depends not only on the auditing tool, but also on the visibility granted to the auditor.**
+
+---
+
+### Conclusion
+
+PIM filled the largest visibility gap left by the previous three methods.
+
+The audit had now answered two separate questions:
+
+**IAM, CLI, and Resource Graph:**
+
+> **"Who currently has access?"**
+
+**Privileged Identity Management:**
+
+> **"Who has privileged access, and who is eligible to activate it?"**
+
+This distinction is critical when reviewing privileged access because an account does not need to hold an active privileged role continuously to represent potential privileged access.
+
+PIM also provided the information needed to distinguish **standing privilege from just-in-time privilege**, making it possible to identify accounts whose permanent access should be reviewed.
+
+The final phase of the audit was to combine the information gathered from all four methods and manually investigate an over-provisioned identity.
+
+---
+
+### Evidence
+
+#### PIM Role Assignments
+
+![PIM role assignments](Screenshots/PA3.png)
+
+*Privileged Identity Management was used to review role assignments, assignment state, inheritance, and duration at an Azure resource scope. Usernames, service-principal identifiers, and lab-specific identity information have been redacted.*
+
+
 
 ---
 
