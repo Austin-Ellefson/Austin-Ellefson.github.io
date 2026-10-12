@@ -55,7 +55,13 @@ Rather than stopping at the configuration setting, I opened the container, copie
 
 **Status:** **Confirmed anonymous blob read** via a private browsing session with no credentials.
 
-**Evidence:** Azure Storage Containers blade showing one container with anonymous access set to `Blob`. Redacted screenshot prepared for upload: `Screenshots/Spin-Up-S3-Storage-Redacted.png`. A second screenshot captures the blob text loading directly in the browser without a signed-in Azure session. After upload, embed `Screenshots/Spin-Up-S3-Incognito-Redacted.png` immediately below the storage-container screenshot. The public blob URL, browser account details, and lab flag are redacted.
+**Evidence — container access setting:**
+
+![Redacted Azure Storage containers view showing Blob anonymous access](Screenshots/Spin-Up-S3-Storage-Redacted.png)
+
+**Evidence — anonymous read verified in an unauthenticated browser:**
+
+![Redacted browser showing a blob file loaded without authentication](Screenshots/Spin-Up-S3-Incognito-Redacted.png)
 
 ### 4. THE DOOR — Who can reach the application?
 
