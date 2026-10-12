@@ -39,7 +39,9 @@ To establish what the working environment looked like, I checked the **User assi
 
 **Status:** Difference from production baseline confirmed; storage authentication method not yet verified.
 
-**Evidence:** Production Function App Identity blade showing a user-assigned identity (redacted screenshot to be uploaded as `Screenshots/Spin-Up-S2-Baseline-Redacted.png`).
+**Evidence — Production baseline with a user-assigned managed identity:**
+
+![Redacted production Function App Identity blade showing a user-assigned managed identity](Screenshots/Spin-Up-S2-Baseline-Redacted.png)
 
 ### 3. THE LEAK — Is any storage data anonymously accessible?
 
