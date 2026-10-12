@@ -23,7 +23,7 @@ A Function App running far from its dependencies could introduce network latency
 
 **Status:** Australia East deployment confirmed; production-baseline comparison pending.
 
-**Evidence:** [Add a redacted screenshot of the Function App Overview — location: Australia East](Screenshots/Spin-Up-S1.webp)
+**Evidence:** [Add a redacted screenshot of the Function App Overview — location: Australia East](Screenshots/Spin-Up-S1-redacted.webp)
 
 ### 2. THE WHO — How does the application authenticate to its dependencies?
 
