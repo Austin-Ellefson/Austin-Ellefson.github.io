@@ -29,7 +29,17 @@ A Function App running far from its dependencies could introduce network latency
 
 ### 2. THE WHO — How does the application authenticate to its dependencies?
 
-_Pending investigation: Review whether the Function App has a managed identity and how it authenticates to storage. Compare against the production service._
+I opened the **Identity** blade on the newly deployed Function App and checked both **System assigned** and **User assigned**. Neither section showed an enabled or attached managed identity.
+
+To establish what the working environment looked like, I checked the **User assigned** tab on the production Function App. Unlike the new deployment, the production app had a user-assigned managed identity attached. This gave me a concrete configuration difference rather than relying on a generic assumption about how the application should be set up.
+
+**Why it matters:** Managed identities let Azure resources obtain access tokens for supported services without storing application secrets. The new app's missing identity raises a question about whether it uses connection strings, account keys, or another authentication method to reach storage. The identity comparison alone does **not** prove that credentials are stored in the app; that would require checking its configuration and dependencies.
+
+**Recommendation:** Confirm how the new Function App connects to storage. If it relies on a stored key or connection string, work with the application owner to configure an appropriately scoped managed identity and use identity-based access, then remove credentials that are no longer necessary.
+
+**Status:** Difference from production baseline confirmed; storage authentication method not yet verified.
+
+**Evidence:** Production Function App Identity blade showing a user-assigned identity (redacted screenshot to be uploaded as `Screenshots/Spin-Up-S2-Baseline-Redacted.png`).
 
 ### 3. THE LEAK — Is any storage data anonymously accessible?
 
