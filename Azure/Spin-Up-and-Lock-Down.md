@@ -45,7 +45,17 @@ To establish what the working environment looked like, I checked the **User assi
 
 ### 3. THE LEAK — Is any storage data anonymously accessible?
 
-_Pending investigation: Inspect storage account and container public-access settings. If permitted, verify any suspected public blob access in a private browser window without authenticating. Do not publish sensitive blob URLs._
+I opened the storage account associated with the new deployment and reviewed **Data storage → Containers**. Most of the containers were set to **Private**, but one container storing intern notes showed an **Anonymous access level** of `Blob`. That stood out because individual blobs in that container could potentially be read without Azure credentials if someone had their URLs.
+
+Rather than stopping at the configuration setting, I opened the container, copied a blob URL from its **Properties**, and pasted it into an **incognito browser window** without signing in. The blob loaded successfully. This confirmed that the file was accessible anonymously; it was not just a theoretical misconfiguration.
+
+**Why it matters:** Unauthenticated visitors who know or obtain a blob URL can read its contents. `Blob` access permits anonymous reads of individual blobs, but does not automatically permit anonymous listing of the container. I did not establish whether other files or confidential data had been accessed.
+
+**Recommendation:** Treat this as the highest-priority issue identified so far. Have the resource owner change the container's anonymous access level to **Private**, verify anonymous requests are denied, and review relevant storage access logs where available. Investigate potential disclosure if the blob contained sensitive data.
+
+**Status:** **Confirmed anonymous blob read** via a private browsing session with no credentials.
+
+**Evidence:** Azure Storage Containers blade showing one container with anonymous access set to `Blob`. Redacted screenshot prepared for upload: `Screenshots/Spin-Up-S3-Storage-Redacted.png`. The unauthenticated browser test was observed during the investigation but is not pictured in this screenshot.
 
 ### 4. THE DOOR — Who can reach the application?
 
