@@ -33,10 +33,6 @@ To establish what the working environment looked like, I checked the **User assi
 
 **Why it matters:** Managed identities let Azure resources obtain access tokens for supported services without storing application secrets. The new app's missing identity raises a question about whether it uses connection strings, account keys, or another authentication method to reach storage. The identity comparison alone does **not** prove that credentials are stored in the app; that would require checking its configuration and dependencies.
 
-**Recommendation:** Confirm how the new Function App connects to storage. If it relies on a stored key or connection string, work with the application owner to configure an appropriately scoped managed identity and use identity-based access, then remove credentials that are no longer necessary.
-
-**Status:** Difference from production baseline confirmed; storage authentication method not yet verified.
-
 **Evidence — Production baseline with a user-assigned managed identity:**
 
 ![Redacted production Function App Identity blade showing a user-assigned managed identity](Screenshots/Spin-Up-S2-Baseline-Redacted.png)
@@ -48,10 +44,6 @@ I opened the storage account associated with the new deployment and reviewed **D
 Rather than stopping at the configuration setting, I opened the container, copied a blob URL from its **Properties**, and pasted it into an **incognito browser window** without signing in. The blob loaded successfully. This confirmed that the file was accessible anonymously; it was not just a theoretical misconfiguration.
 
 **Why it matters:** Unauthenticated visitors who know or obtain a blob URL can read its contents. `Blob` access permits anonymous reads of individual blobs, but does not automatically permit anonymous listing of the container. I did not establish whether other files or confidential data had been accessed.
-
-**Recommendation:** Treat this as the highest-priority issue identified so far. Have the resource owner change the container's anonymous access level to **Private**, verify anonymous requests are denied, and review relevant storage access logs where available. Investigate potential disclosure if the blob contained sensitive data.
-
-**Status:** **Confirmed anonymous blob read** via a private browsing session with no credentials.
 
 **Evidence — container access setting:**
 
@@ -68,10 +60,6 @@ I opened **Networking → Access restrictions** on the newly deployed Function A
 I then checked the existing production Function App for a baseline. That app limited public network access to selected networks and IP addresses; its **Unmatched rule action** was **Deny**, with an explicit deny rule in the table. Unlike the new deployment, the production configuration rejects incoming traffic that does not satisfy an allowed rule.
 
 **Why it matters:** This Function App is intended for internal, outbound notification work, so broad inbound network reachability appears unnecessary. Even if the application currently has no accessible HTTP-triggered functions, permitting inbound traffic increases its potential attack surface. An open network setting does **not** by itself prove that an unauthenticated user can execute a function.
-
-**Recommendation:** Confirm required triggers and administrative access with the application owner, then restrict public network access or use private endpoints as appropriate. Where access restrictions are used, define only required allow rules and ensure unmatched traffic is denied. Retest access after the change. A carefully scoped deny rule can block otherwise-unmatched traffic, but do not assume one rule is appropriate without checking exceptions.
-
-**Status:** Inbound network configuration mismatch confirmed; external exploitation or HTTP-trigger reachability not tested.
 
 **Evidence — New Function App: unrestricted inbound access**
 
