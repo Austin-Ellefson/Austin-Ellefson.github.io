@@ -13,7 +13,7 @@ Contact: austin.ellefson3331@gmail.com · https://www.linkedin.com/in/austin-ell
 | 1 | Operation Dead Deploy | Governance forensics, deployment audit trail | [View Write-up](Azure/Operation-Dead-Deploy.md) |
 | 2 | The Stolen Identity | App registration attack kill chain (Entra ID) | [View Write-up](Azure/The-Stolen-Identity.md) |
 | 3 | Privilege Audit | RBAC and least privilege | coming, week 3 |
-| 4 | Spin Up and Lock Down | Pre-production Azure deployment review | [View Write-up](Azure/Spin-Up-and-Lock-Down.md) |
+| 4 | The Friday Deploy | Pre-production Azure deployment review | [View Write-up](Azure/Spin-Up-and-Lock-Down.md) |
 | 5 | Network the Operative | Network segmentation | coming, week 5 |
 | 6 | Bucket Looting | Storage exposure hunting | coming, week 6 |
 | 7 | Find the Anomaly | Log analysis and KQL | coming, week 7 |
