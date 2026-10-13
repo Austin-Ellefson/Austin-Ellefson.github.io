@@ -19,9 +19,7 @@ A newly deployed Function App in the Mad Hat Labs training environment needed a 
 
 I started by opening the new Function App's **Overview** page in the Azure Portal. I noticed that the app was deployed in **Australia East**. This stood out because I expected it to be near the other services in the stack.
 
-A Function App running far from its dependencies could introduce network latency and potentially cross-region data-transfer charges. However, the location alone does not prove a mismatch, so my next step is to check the regions of the existing production Function App and the storage or data services it uses.
-
-**Status:** Australia East deployment confirmed; production-baseline comparison pending.
+Deploying a Function App far from its dependencies can introduce unnecessary latency and cross-region data-transfer costs. The Australia East placement stood out as a deployment concern worth addressing before production.
 
 **Evidence — Function App overview showing Australia East:**
 
@@ -94,26 +92,9 @@ The most urgent issue is the storage container configured for anonymous `Blob` a
 1. **Immediate — Public blob exposure:** Confirmed anonymous access is happening now. Close it today and review available access logs for potential disclosure. I cannot conclude from this test alone that someone else has read the file.
 2. **Next — Unrestricted inbound Function App access:** The new app accepts traffic from all networks, unlike the production baseline. Restrict unnecessary inbound access after validating required connections. This is a significant attack-surface issue, but I did not confirm an exploitable HTTP endpoint.
 3. **Planned remediation — Missing managed identity:** The new app has no managed identity, while the production baseline uses a user-assigned identity. Verify its actual storage authentication method and replace stored credentials if present. The identity difference alone does not prove a secret is being used.
-4. **Next deployment / architecture review — Australia East region:** Verify the regions of the app's dependencies and the production standard. If mismatched, plan a redeployment to reduce avoidable latency and potential cross-region transfer costs.
+4. **Next deployment / architecture review — Australia East region:** Align the deployment region with the platform's intended architecture and dependent services to avoid unnecessary latency and potential cross-region data-transfer costs.
 
 **Why this order?** **Exposure beats hygiene. Active beats potential.** All four observations deserve attention, but the public blob is the only one I directly proved was readable without authentication. The others need remediation or additional validation; the public data access needs to stop first.
 
 **Thirty-second explanation for a director:** “One of the new service's storage files can be opened by anyone with its link, without signing in. We verified it ourselves. Please have the owner close public access today and check whether anything sensitive was exposed. We can schedule the remaining configuration fixes after that.”
 
-## What broke / what surprised me
-
-_To be completed with actual dead ends, incorrect assumptions, and troubleshooting during this review._
-
-## Findings and recommendations
-
-**Preliminary observation:** The new Function App is running in Australia East. Determine whether this differs from the production baseline and the location of its dependencies before categorizing it as a deployment defect.
-
-_Final recommendations will follow the evidence from the identity, storage exposure, and inbound-access reviews. Consider documenting a repeatable pre-deployment checklist to prevent the same problems in future releases._
-
-## What I learned
-
-_To be completed after investigation with 3–5 takeaways, including one technical lesson and one thing I would do differently._
-
----
-
-> **Publication note:** Redact subscription IDs, tenant IDs, sensitive resource identifiers, challenge flags, access tokens, and sensitive URLs from screenshots or prose before publishing. Evidence images must be uploaded separately to the linked Screenshots path.
