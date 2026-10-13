@@ -65,7 +65,21 @@ Rather than stopping at the configuration setting, I opened the container, copie
 
 ### 4. THE DOOR — Who can reach the application?
 
-_Pending investigation: Review Function App inbound access restrictions, default actions, and how they compare with the existing production configuration._
+I opened **Networking → Access restrictions** on the newly deployed Function App. Its **Public network access** was set to **Enabled from all networks**, and the main site's **Unmatched rule action** was **Allow**. The rules table showed an **Allow all** entry. I didn't find any inbound restriction preventing unsolicited requests from reaching the application's public endpoint.
+
+I then checked the existing production Function App for a baseline. That app limited public network access to selected networks and IP addresses; its **Unmatched rule action** was **Deny**, with an explicit deny rule in the table. Unlike the new deployment, the production configuration rejects incoming traffic that does not satisfy an allowed rule.
+
+**Why it matters:** This Function App is intended for internal, outbound notification work, so broad inbound network reachability appears unnecessary. Even if the application currently has no accessible HTTP-triggered functions, permitting inbound traffic increases its potential attack surface. An open network setting does **not** by itself prove that an unauthenticated user can execute a function.
+
+**Recommendation:** Confirm required triggers and administrative access with the application owner, then restrict public network access or use private endpoints as appropriate. Where access restrictions are used, define only required allow rules and ensure unmatched traffic is denied. Retest access after the change. A carefully scoped deny rule can block otherwise-unmatched traffic, but do not assume one rule is appropriate without checking exceptions.
+
+**Status:** Inbound network configuration mismatch confirmed; external exploitation or HTTP-trigger reachability not tested.
+
+**Evidence to upload:**
+- New deployment: `Screenshots/Spin-Up-S4-New-App-Network-Redacted.png`
+- Production baseline: `Screenshots/Spin-Up-S4-Production-Network-Redacted.png`
+
+_Once these files are uploaded, embed both images here._
 
 ### 5. THE CALL — What should be fixed first?
 
