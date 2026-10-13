@@ -85,9 +85,20 @@ _Production screenshot pending upload to `Screenshots/Spin-Up-S4-Production-Netw
 
 ### 5. THE CALL — What should be fixed first?
 
-_Pending completed review. Rank findings based on demonstrated exposure, impact, and likelihood rather than treating every configuration difference as equally urgent._
+**My priority call: Close the public `intern-notes` container today.**
 
-**Prioritization principle:** Exposure beats hygiene; active exposure beats potential risk.
+The most urgent issue is the storage container configured for anonymous `Blob` access. I copied a blob URL and opened it in an incognito window without signing into Azure. The file loaded. That means this is not only a configuration weakness: I verified that someone without credentials can read the file if they have the URL. The resource owner should switch the container to **Private** immediately, verify the URL no longer works anonymously, and assess whether any exposed information needs follow-up.
+
+**Priority ranking:**
+
+1. **Immediate — Public blob exposure:** Confirmed anonymous access is happening now. Close it today and review available access logs for potential disclosure. I cannot conclude from this test alone that someone else has read the file.
+2. **Next — Unrestricted inbound Function App access:** The new app accepts traffic from all networks, unlike the production baseline. Restrict unnecessary inbound access after validating required connections. This is a significant attack-surface issue, but I did not confirm an exploitable HTTP endpoint.
+3. **Planned remediation — Missing managed identity:** The new app has no managed identity, while the production baseline uses a user-assigned identity. Verify its actual storage authentication method and replace stored credentials if present. The identity difference alone does not prove a secret is being used.
+4. **Next deployment / architecture review — Australia East region:** Verify the regions of the app's dependencies and the production standard. If mismatched, plan a redeployment to reduce avoidable latency and potential cross-region transfer costs.
+
+**Why this order?** **Exposure beats hygiene. Active beats potential.** All four observations deserve attention, but the public blob is the only one I directly proved was readable without authentication. The others need remediation or additional validation; the public data access needs to stop first.
+
+**Thirty-second explanation for a director:** “One of the new service's storage files can be opened by anyone with its link, without signing in. We verified it ourselves. Please have the owner close public access today and check whether anything sensitive was exposed. We can schedule the remaining configuration fixes after that.”
 
 ## What broke / what surprised me
 
