@@ -75,11 +75,13 @@ I then checked the existing production Function App for a baseline. That app lim
 
 **Status:** Inbound network configuration mismatch confirmed; external exploitation or HTTP-trigger reachability not tested.
 
-**Evidence to upload:**
-- New deployment: `Screenshots/Spin-Up-S4-New-App-Network-Redacted.png`
-- Production baseline: `Screenshots/Spin-Up-S4-Production-Network-Redacted.png`
+**Evidence — New Function App: unrestricted inbound access**
 
-_Once these files are uploaded, embed both images here._
+![Redacted Azure Function App access restrictions showing Allow all and unmatched Allow](Screenshots/Spin-Up-S4-New-App-Network-Redacted.png)
+
+**Evidence — Production baseline: inbound traffic restricted**
+
+_Production screenshot pending upload to `Screenshots/Spin-Up-S4-Production-Network-Redacted.png`._
 
 ### 5. THE CALL — What should be fixed first?
 
