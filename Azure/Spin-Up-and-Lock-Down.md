@@ -1,4 +1,4 @@
-# Spin Up and Lock Down — Reviewing an Azure Deployment Before Production
+# The Friday Deploy
 
 ## Scenario
 
