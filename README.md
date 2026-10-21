@@ -14,7 +14,7 @@ Contact: austin.ellefson3331@gmail.com · https://www.linkedin.com/in/austin-ell
 | 2 | The Stolen Identity | App registration attack kill chain (Entra ID) | [View Write-up](Azure/The-Stolen-Identity.md) |
 | 3 | Privilege Audit | RBAC and least privilege | [View Write-up](Azure/Privilege-Audit.md) |
 | 4 | The Friday Deploy | Pre-production Azure deployment review | [View Write-up](Azure/The-Friday-Deploy.md) |
-| 5 | Network the Operative | Network segmentation | coming, week 5 |
+| 5 | Network the Operative | VNet, NSG, routing, private endpoints, private DNS | [View Write-up](Azure/Network-the-Operative.md) |
 | 6 | Bucket Looting | Storage exposure hunting | coming, week 6 |
 | 7 | Find the Anomaly | Log analysis and KQL | coming, week 7 |
 | 8 | Hunt the Threat | SIEM operations (Sentinel) | coming, week 8 |
