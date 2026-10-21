@@ -18,7 +18,7 @@ The application team wanted to know why its service could reach a storage accoun
 
 ## 1. THE VNET
 
-I began with the virtual network and identified the subnet hosting the application workload. The workload subnet uses **[SUBNET CIDR — verify in portal]**, within the VNet's private address space. This establishes the starting point for the connection to storage and the scope in which subnet-level rules and routes apply.
+I began with the virtual network and identified the subnet hosting the application workload. The workload subnet uses **10.60.1.0/24**, within the VNet's private address space. This establishes the starting point for the connection to storage and the scope in which subnet-level rules and routes apply.
 
 ## 2. THE NSG
 
