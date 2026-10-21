@@ -34,7 +34,7 @@ I reviewed the DNS configuration for **pe-lab-storage**, the private endpoint co
 
 ## 5. THE NAME
 
-I checked the private DNS zone and VNet link used for storage name resolution. The DNS record **[DNS RECORD / FQDN — verify in portal]** should resolve to **[PRIVATE ENDPOINT IP — verify in portal]**. This lets the app use its usual storage hostname while receiving the private endpoint address as its destination.
+I reviewed the private DNS zone **privatelink.blob.core.windows.net** and identified an A record for the storage account **stmadhatlabchap5**. The record's full name is **stmadhatlabchap5.privatelink.blob.core.windows.net**, and it resolves to **10.60.1.62**, matching the private endpoint IP identified in Hop 4. This explains how the application can access the storage account by hostname instead of using a hardcoded IP address. DNS directs the application toward the private endpoint, allowing storage traffic to remain on Azure's private network path rather than using the public internet. The DNS record is verified; the VNet link still needs to be confirmed in the portal.
 
 ## The Answer — Ticket Reply
 
