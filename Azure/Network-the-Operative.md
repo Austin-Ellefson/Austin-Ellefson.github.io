@@ -26,7 +26,7 @@ I reviewed the inbound and outbound rules on **nsg-lab-workload**, the NSG assoc
 
 ## 3. THE ROUTE
 
-I reviewed the subnet's effective routes to determine where packets are sent. The lab describes a forced-tunnel route toward a firewall and a more-specific **/32** route for the storage private endpoint. When both routes apply, Azure's longest-prefix match selects the /32 endpoint route over the broader tunnel route. The effective routes should confirm the exact prefix and next hop; this explains why the storage connection does not traverse the firewall in the described configuration.
+I reviewed the route table **rt-lab-workload** and identified a user-defined route named **force-egress**. This route sends traffic destined for `0.0.0.0/0` to a virtual appliance at **10.60.100.4**, establishing a forced-tunnel configuration for outbound traffic. However, Azure uses longest-prefix matching when selecting routes, meaning a more specific route to the storage private endpoint can take precedence over this default route. This explains how the application can reach storage through its private endpoint without sending that traffic through the firewall, while other traffic following the default route is forwarded to the virtual appliance for inspection.
 
 ## 4. THE PRIVATE ENDPOINT
 
