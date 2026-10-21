@@ -22,7 +22,7 @@ I began with the virtual network and identified the subnet hosting the applicati
 
 ## 2. THE NSG
 
-I checked the NSG associated with the workload subnet, focusing on outbound rules and their priorities. The expected path is permitted by an outbound allow rule, potentially Azure's default **AllowVNetOutBound** rule, as long as no higher-priority deny rule matches the destination. The effective rules must confirm that traffic to the storage private endpoint is allowed.
+I reviewed the inbound and outbound rules on **nsg-lab-workload**, the NSG associated with the application subnet. On the inbound side, a custom rule allows HTTPS traffic on port **443** only from **203.0.113.50**, followed by a custom catch-all deny rule that blocks other inbound traffic before Azure's default rules are evaluated. On the outbound side, there are no custom rules, so traffic to the storage private endpoint is permitted by Azure's default **AllowVNetOutBound** rule. Since the storage connection stays within the VNet through the private endpoint, the NSG allows that outbound traffic without requiring an additional exception.
 
 ## 3. THE ROUTE
 
