@@ -30,7 +30,7 @@ I reviewed the route table **rt-lab-workload** and identified a user-defined rou
 
 ## 4. THE PRIVATE ENDPOINT
 
-I traced the storage account's private connectivity settings to its private endpoint. The endpoint's private address is **[PRIVATE ENDPOINT IP — verify in portal]** in **[ENDPOINT SUBNET — verify in portal]**. A private endpoint makes Azure Storage reachable at a private IP through Azure Private Link even with public network access disabled; the app does not need to use the storage account's public network endpoint.
+I reviewed the DNS configuration for **pe-lab-storage**, the private endpoint connected to the **stmadhatlabchap5** storage account. The endpoint has a private IP address of **10.60.1.62**, which falls within the workload subnet's `10.60.1.0/24` address range. Although public network access is disabled on the storage account, Azure Private Link allows the application to communicate with it through this private address. The endpoint also introduces a specific `/32` route, which takes precedence over the broader `0.0.0.0/0` forced-tunnel route. This explains why storage traffic stays on Azure's private network path instead of passing through the firewall at `10.60.100.4`.
 
 ## 5. THE NAME
 
