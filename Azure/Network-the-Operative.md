@@ -46,8 +46,5 @@ I traced the network path used by the application to access the customer-data st
 
 I would ask the networking/security team to confirm that bypassing firewall inspection for traffic to this storage private endpoint is intentional and covered by the team's security design.
 
-## Evidence to Finalize
-
-Before closing the investigation, record the exact portal values: workload subnet CIDR, outbound NSG rule name/priority, effective route prefix and next hop, private endpoint IP and subnet, private DNS record and its VNet link. Redact sensitive identifiers as needed before publishing screenshots.
 
 **Key takeaway:** Read-only Azure access can be enough to reconstruct and explain a service's network path, provided every conclusion is tied to configuration evidence.
