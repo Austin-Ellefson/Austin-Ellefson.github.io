@@ -39,7 +39,9 @@ I then examined **Access control (IAM)** and opened the permissions view for a s
 
 **Conclusion:** Access should be evaluated across both authentication methods and identity permissions. To complete the trace, verify the shared-key setting and confirm which user-assigned managed identity holds the relevant role. The presence of a role in IAM's role catalog does not by itself prove it is assigned to the application.
 
-**Evidence:** Azure Portal → Storage account → **Access control (IAM)** → role permissions. A redacted screenshot was prepared for the portfolio; the image will be embedded after upload to the repository.
+**Evidence:** Azure Portal → Storage account → **Access control (IAM)** → role permissions. The role name and identifying information are redacted to avoid exposing the lab answer.
+
+![Redacted IAM role permissions view — Stop 2](Screenshots/week6_stop2_redacted.png)
 
 ### 3. THE NETWORK — Pending investigation
 
