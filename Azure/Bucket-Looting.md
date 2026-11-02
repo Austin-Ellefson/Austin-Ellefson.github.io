@@ -35,7 +35,9 @@ This gave me the endpoint to trace through the application's connection configur
 
 **Conclusion:** I confirmed the blob hostname for the primary storage account. An endpoint being listed does **not** establish that anonymous users can access the data or that traffic is permitted over the public internet. Authentication and network reachability still need separate checks.
 
-**Evidence:** Azure Portal → `stmadhatlabchap6` → **Endpoints**, showing the Blob service URL. Screenshot captured during the investigation; image will be added to the repository after redaction and upload.
+**Evidence:** Azure Portal → `stmadhatlabchap6` → **Endpoints**. The endpoint values and resource identifiers are redacted to avoid disclosing the lab answer.
+
+![Redacted Azure Storage Endpoints page](Screenshots/Redacted%20Azure%20Storage%20Endpoints%20Page.png)
 
 **Still to verify:** Account type, redundancy, and region from Overview, along with whether the Key Vault secret actually references this endpoint.
 
