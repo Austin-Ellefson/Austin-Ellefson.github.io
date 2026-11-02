@@ -72,7 +72,9 @@ This confirmed that the expected secret was present and readable through my assi
 
 **Conclusion:** My Key Vault role allowed an authorized read of the stored secret. The runtime retrieval path, identity permissions, and any connection destinations described by the value must be validated separately before declaring the complete data trace secure.
 
-**Evidence:** Azure Portal → Key Vault → **Secrets** → current secret version. I redacted the displayed secret value, secret identifier, and version ID to prevent revealing the flag. The image will be embedded after uploading `week6_stop4_redacted.png` to `Azure/Screenshots/`.
+**Evidence:** Azure Portal → Key Vault → **Secrets** → current secret version. I redacted the displayed secret value, secret identifier, and version ID to prevent revealing the flag. The redacted evidence image is embedded below.
+
+![Redacted Key Vault secret version — Stop 4](Screenshots/week6_stop4_redacted.png)
 
 
 ### 5. THE SECOND COPY — Pending investigation
