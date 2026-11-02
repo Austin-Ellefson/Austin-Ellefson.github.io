@@ -55,7 +55,9 @@ The page also displayed the same hostname-to-address pair under **Custom DNS rec
 
 **Conclusion:** The endpoint's private address identifies the intended private destination for storage traffic. Public network exposure and actual DNS behavior should be validated separately; neither can be conclusively established from the endpoint DNS screenshot alone.
 
-**Evidence:** Azure Portal → private endpoint → **Settings → DNS configuration**. The private IP, hostname, and endpoint identifiers are redacted from the screenshot to avoid revealing lab answers. The redacted image is ready to upload as `Azure/Screenshots/week6_stop3_redacted.png`.
+**Evidence:** Azure Portal → private endpoint → **Settings → DNS configuration**. The private IP, hostname, and endpoint identifiers are redacted from the screenshot to avoid revealing lab answers. The redacted image is embedded below.
+
+![Redacted private endpoint DNS configuration — Stop 3](Screenshots/week6_stop3_redacted.png)
 
 
 ### 4. THE SECRET — Pending investigation
