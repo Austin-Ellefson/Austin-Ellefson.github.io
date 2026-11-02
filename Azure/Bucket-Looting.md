@@ -89,7 +89,13 @@ The export included customer records and a storage connection string containing 
 
 **Conclusion:** The investigation established an anonymously reachable copy of sensitive-looking customer data in the secondary storage account. Protecting the original resource did not protect the duplicated data. Anonymous access to the listing and file was demonstrated by opening the URLs without signing in; no account keys or flags are published here.
 
-**Evidence:** (1) Anonymous XML container listing showing an export blob; (2) JSON export showing the presence of records, a connection-string field, and a flag field. Both screenshots must be redacted before publication. The redacted JSON export image is prepared for upload as `Azure/Screenshots/week6_stop5_export_redacted.png`. The listing image can be added separately after verification.
+**Evidence 1 — Anonymous container listing:** The XML response demonstrated that the export blob could be enumerated without an Azure sign-in. Identifiers and lab-answer details are redacted.
+
+![Redacted anonymous blob container listing — Stop 5](Screenshots/week6_stop5_listing_redacted.png)
+
+**Evidence 2 — Exposed migration export:** The downloaded JSON demonstrated that the secondary copy contained customer records and an embedded connection string. Identifying information, credential material, and the lab flag are redacted.
+
+![Redacted customer migration export — Stop 5](Screenshots/week6_stop5_export_redacted.png)
 
 ## What broke / what surprised me
 
