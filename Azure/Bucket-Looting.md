@@ -77,27 +77,40 @@ This confirmed that the expected secret was present and readable through my assi
 ![Redacted Key Vault secret version — Stop 4](Screenshots/week6_stop4_redacted.png)
 
 
-### 5. THE SECOND COPY — Pending investigation
+### 5. THE SECOND COPY — Public migration export
 
-Look beyond the ticket's named storage account to determine whether a second copy of the data exists with weaker controls.
+Instead of closing the ticket after verifying the primary storage path, I returned to the resource-group inventory and checked the other storage account. The backup account had a different security posture: the lab described **public network access as enabled**, and its blob container permitted anonymous access.
+
+To test whether the exposure was real, I opened a private browser session without Azure authentication and requested the container's blob-listing URL. The response was XML describing an export blob. I then opened the blob's URL anonymously and received a JSON customer-data export. I have omitted the storage account, container, blob filename, endpoint, and lab flag from this public report.
+
+The export included customer records and a storage connection string containing an account key. That raises the severity beyond a forgotten test file: the anonymous blob provided both data and a credential-like secret that could facilitate additional access if still valid. The records in this training scenario are illustrative, but the failure mode is applicable to production environments.
+
+**Root cause:** A temporary copy made for migration testing was left behind in a storage location with weaker controls than the primary account. The export metadata itself described a temporary test and indicated that the copy should have been deleted. No need to defeat the hardened primary path existed when the data was available through an overlooked secondary location.
+
+**Conclusion:** The investigation established an anonymously reachable copy of sensitive-looking customer data in the secondary storage account. Protecting the original resource did not protect the duplicated data. Anonymous access to the listing and file was demonstrated by opening the URLs without signing in; no account keys or flags are published here.
+
+**Evidence:** (1) Anonymous XML container listing showing an export blob; (2) JSON export showing the presence of records, a connection-string field, and a flag field. Both screenshots must be redacted before publication. The redacted JSON export image is prepared for upload as `Azure/Screenshots/week6_stop5_export_redacted.png`. The listing image can be added separately after verification.
 
 ## What broke / what surprised me
 
-Not yet documented. This section will capture actual dead ends or surprises encountered during the investigation.
+The first four stops focused on the primary resource, and it would have been easy to declare the ticket complete once that path appeared hardened. What changed the investigation was checking the entire resource-group inventory. A second storage account held a migration export that did not inherit the primary account's protections. The anonymous listing was a direct test of exposure, not merely an inference from a portal toggle.
+
+A second concern was the connection string embedded inside the export itself. Even after blocking anonymous reads, an exposed storage key should be treated as potentially compromised until investigated and rotated if real.
 
 ## Findings and recommendations
 
-**Findings so far:** The primary storage account's blob hostname is verified, and a storage data role's permissions were reviewed. The private endpoint's DNS configuration also displays a private-address mapping. Shared-key posture, the application's actual identity assignment, effective VNet DNS resolution, and public exposure still require separate verification.
+**Finding:** The secondary storage account exposed a migration export that could be listed and downloaded without Azure authentication. The file contained customer records and an embedded storage connection string. This was a separate exposure path from the primary account's intended private, identity-controlled access.
 
-**Preliminary recommendations:**
-1. Verify identity-based authorization and shared-key posture before assuming the endpoint is protected.
-2. Confirm the application's actual network path and the access policies on **every** copy of the data.
+1. **Contain the exposure:** Disable anonymous blob access and restrict public network access on the secondary storage account; preserve evidence and remove unneeded copies through the approved incident process.
+2. **Treat credentials as exposed:** Identify whether the embedded storage key is valid, rotate it when applicable, review use of the credential and related access logs, and assess any data-access impact.
+3. **Prevent recurrence:** Inventory secondary copies, apply the same classification and security baseline to exports and backups, and give temporary migration data an owner and an automatic expiry/deletion process.
 
 ## What I learned
 
-- A blob endpoint hostname identifies where a storage request is addressed; it is not proof of public access.
-- Azure Storage can advertise more than one service endpoint on the same account.
-- IAM role definitions describe possible permissions; **Check access** is needed to establish an actual identity-to-role assignment.
-- Next time, I would capture account type, region, and redundancy on the Overview page before moving to Endpoints.
+- An Azure Blob endpoint existing does not by itself prove public access; an **unauthenticated listing and download** are stronger evidence.
+- A storage account's hardened network and authorization controls do not automatically protect other accounts holding the same data.
+- IAM role definitions describe possible permissions; **Check access** is required to prove an actual assignment.
+- I would inspect the whole resource-group inventory earlier, not just the resource named in the ticket.
+- Temporary migration exports need access controls, lifecycle management, and cleanup ownership.
 
 > **Investigation principle:** Hardening matters everywhere the data exists, not just on the primary resource.
