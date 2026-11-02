@@ -29,9 +29,17 @@ I also noted a separate **File service** endpoint. Its presence alone does not e
 
 **Still to verify:** Account type, redundancy, and region from Overview, along with whether the Key Vault secret actually references this endpoint.
 
-### 2. THE KEY POSTURE — Pending investigation
+### 2. THE KEY POSTURE — Investigating identity permissions
 
-Verify shared-key authorization settings and what permissions the application's identity has on storage.
+After identifying the data endpoint, I moved from *where the app connects* to *how it is authorized*. My first check was the storage account's **Configuration** blade, specifically **Allow storage account key access**. This control matters because permitting account-key authentication creates a separate authorization path outside Entra ID role assignments.
+
+I then examined **Access control (IAM)** and opened the permissions view for a storage data-access role. The role details showed permissions associated with managing blob containers and data. That helped me understand why a service that writes data needs more than a read-only role. I deliberately omitted the exact role name and permission list so this write-up does not supply the lab answer.
+
+**What the screenshot proves:** The storage account's IAM interface was reviewed and a storage data role's permissions were inspected. It does **not** itself show the identity's assignment, the role assignment scope, or the Configuration toggle's current value. Those require separate evidence from **Check access → Managed identity** and **Configuration**, respectively.
+
+**Conclusion:** Access should be evaluated across both authentication methods and identity permissions. To complete the trace, verify the shared-key setting and confirm which user-assigned managed identity holds the relevant role. The presence of a role in IAM's role catalog does not by itself prove it is assigned to the application.
+
+**Evidence:** Azure Portal → Storage account → **Access control (IAM)** → role permissions. A redacted screenshot was prepared for the portfolio; the image will be embedded after upload to the repository.
 
 ### 3. THE NETWORK — Pending investigation
 
@@ -51,7 +59,7 @@ Not yet documented. This section will capture actual dead ends or surprises enco
 
 ## Findings and recommendations
 
-**Finding so far:** The primary storage account's blob hostname is verified. Exposure has **not** yet been determined.
+**Findings so far:** The primary storage account's blob hostname is verified, and a storage data role's permissions were reviewed. The shared-key setting, application identity assignment, and public exposure are not yet established by the available screenshots.
 
 **Preliminary recommendations:**
 1. Verify identity-based authorization and shared-key posture before assuming the endpoint is protected.
@@ -61,6 +69,7 @@ Not yet documented. This section will capture actual dead ends or surprises enco
 
 - A blob endpoint hostname identifies where a storage request is addressed; it is not proof of public access.
 - Azure Storage can advertise more than one service endpoint on the same account.
+- IAM role definitions describe possible permissions; **Check access** is needed to establish an actual identity-to-role assignment.
 - Next time, I would capture account type, region, and redundancy on the Overview page before moving to Endpoints.
 
 > **Investigation principle:** Hardening matters everywhere the data exists, not just on the primary resource.
