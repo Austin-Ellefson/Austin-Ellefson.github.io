@@ -60,9 +60,20 @@ The page also displayed the same hostname-to-address pair under **Custom DNS rec
 ![Redacted private endpoint DNS configuration — Stop 3](Screenshots/week6_stop3_redacted.png)
 
 
-### 4. THE SECRET — Pending investigation
+### 4. THE SECRET — Examine the application secret
 
-Read the relevant Key Vault secret using authorized access, trace the application's runtime configuration, and document how credentials are kept out of source code. Do not publish secret values.
+To investigate the application's stored connection information, I opened the Key Vault in the assigned resource group and navigated to **Secrets**. My access was limited but sufficient for this task: I held **Key Vault Secrets User** on the vault, allowing me to read the existing secret value without changing vault configuration.
+
+I selected the application-related secret and opened its current version. The secret was marked **Enabled**, and the portal displayed a value when I chose to reveal it. I recorded the lab submission privately and deliberately left the secret's name, identifier, version, and value out of this public write-up.
+
+This confirmed that the expected secret was present and readable through my assigned permissions. It did **not** independently demonstrate that the application retrieves it using a managed identity at startup, or that its contents point to the primary storage endpoint; those questions require verifying the application's identity/configuration and the actual secret format.
+
+**What I found:** Key Vault provides a dedicated place to store sensitive application configuration instead of embedding it directly in source code. Access to the value is controlled separately from ordinary resource-group Reader access.
+
+**Conclusion:** My Key Vault role allowed an authorized read of the stored secret. The runtime retrieval path, identity permissions, and any connection destinations described by the value must be validated separately before declaring the complete data trace secure.
+
+**Evidence:** Azure Portal → Key Vault → **Secrets** → current secret version. I redacted the displayed secret value, secret identifier, and version ID to prevent revealing the flag. The image will be embedded after uploading `week6_stop4_redacted.png` to `Azure/Screenshots/`.
+
 
 ### 5. THE SECOND COPY — Pending investigation
 
