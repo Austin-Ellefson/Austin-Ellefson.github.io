@@ -43,9 +43,20 @@ I then examined **Access control (IAM)** and opened the permissions view for a s
 
 ![Redacted IAM role permissions view — Stop 2](Screenshots/week6_stop2_redacted.png)
 
-### 3. THE NETWORK — Pending investigation
+### 3. THE NETWORK — Trace the private path
 
-Trace access controls, private endpoint configuration, and DNS resolution before concluding whether the storage service is reachable publicly.
+After reviewing the storage account's access controls, I moved to the **Networking** settings to investigate how the application is intended to reach the data. The lab's configuration describes public network access as disabled and an approved private endpoint, so I inspected the endpoint itself rather than assuming the connection string was enough to establish connectivity.
+
+In the private endpoint's **DNS configuration** blade, I identified a customer-visible storage hostname associated with a private address on the endpoint's network interface. I recorded the actual address for the lab without publishing it. This is the key distinction: the storage hostname can be used by the application while the connection is directed toward a private endpoint rather than requiring public access to the storage account.
+
+The page also displayed the same hostname-to-address pair under **Custom DNS records**, giving me a second place to cross-check the mapping.
+
+**What surprised me:** The private DNS zone group section showed **No results**. The screenshot therefore establishes the private endpoint's displayed IP/FQDN mapping but does not independently prove that the workload's VNet DNS resolves the name to that address. To confirm end-to-end reachability, I would check the VNet's linked private DNS zone or the workload's actual DNS resolution.
+
+**Conclusion:** The endpoint's private address identifies the intended private destination for storage traffic. Public network exposure and actual DNS behavior should be validated separately; neither can be conclusively established from the endpoint DNS screenshot alone.
+
+**Evidence:** Azure Portal → private endpoint → **Settings → DNS configuration**. The private IP, hostname, and endpoint identifiers are redacted from the screenshot to avoid revealing lab answers. The redacted image is ready to upload as `Azure/Screenshots/week6_stop3_redacted.png`.
+
 
 ### 4. THE SECRET — Pending investigation
 
@@ -61,7 +72,7 @@ Not yet documented. This section will capture actual dead ends or surprises enco
 
 ## Findings and recommendations
 
-**Findings so far:** The primary storage account's blob hostname is verified, and a storage data role's permissions were reviewed. The shared-key setting, application identity assignment, and public exposure are not yet established by the available screenshots.
+**Findings so far:** The primary storage account's blob hostname is verified, and a storage data role's permissions were reviewed. The private endpoint's DNS configuration also displays a private-address mapping. Shared-key posture, the application's actual identity assignment, effective VNet DNS resolution, and public exposure still require separate verification.
 
 **Preliminary recommendations:**
 1. Verify identity-based authorization and shared-key posture before assuming the endpoint is protected.
