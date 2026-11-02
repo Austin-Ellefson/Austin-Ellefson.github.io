@@ -7,9 +7,7 @@ An application developer requested a security trace of a long-running service th
 ## Environment
 
 - **Platform:** Microsoft Azure (Mad Hat Labs, multi-user training tenant)
-- **Resource group:** `rg-madhat-lab-chap6`
-- **Primary storage account:** `stmadhatlabchap6`
-- **Key Vault:** `kv-madhat-lab-chap6`
+- **Scope:** Chapter 6 training resource group, primary storage account, and Key Vault (exact resource names omitted to avoid spoilers)
 - **Access:** Reader on the resource group; Key Vault Secrets User on the vault
 - **Tools:** Azure Portal, Storage Account Endpoints, Azure RBAC and networking settings (subsequent investigation)
 
@@ -17,25 +15,15 @@ An application developer requested a security trace of a long-running service th
 
 ### 1. THE DATA — Identify the storage endpoint
 
-I opened the storage account **stmadhatlabchap6** in **rg-madhat-lab-chap6** and navigated to its **Endpoints** page. The page showed the account's provisioning state as **Succeeded** and listed the service endpoints for the account.
+I opened the primary storage account in the assigned resource group and navigated to its **Endpoints** page. The page showed the provisioning state as **Succeeded** and listed separate service endpoints.
 
-The **Blob service** endpoint was:
+I located the **Blob service** endpoint and extracted the hostname by removing the URL scheme and trailing slash. I recorded the actual hostname privately for the lab submission rather than publishing it here. This gives the investigation a concrete address to follow through connection configuration, DNS, and network controls.
 
-```text
-https://stmadhatlabchap6.blob.core.windows.net/
-```
-
-The hostname required for the lab was:
-
-```text
-stmadhatlabchap6.blob.core.windows.net
-```
-
-This gave me the endpoint to trace through the application's connection configuration, DNS, and network controls. The account also exposes a separate **File service endpoint**, but that alone does not mean the app is using Azure Files.
+I also noted a separate **File service** endpoint. Its presence alone does not establish that the application uses Azure Files.
 
 **Conclusion:** I confirmed the blob hostname for the primary storage account. An endpoint being listed does **not** establish that anonymous users can access the data or that traffic is permitted over the public internet. Authentication and network reachability still need separate checks.
 
-**Evidence:** Azure Portal → `stmadhatlabchap6` → **Endpoints**. The endpoint values and resource identifiers are redacted to avoid disclosing the lab answer.
+**Evidence:** Azure Portal → primary storage account → **Endpoints**. The endpoint values and resource identifiers are redacted to avoid disclosing the lab answer.
 
 ![Redacted Azure Storage Endpoints page](Screenshots/Redacted%20Azure%20Storage%20Endpoints%20Page.png)
 
