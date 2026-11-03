@@ -2,12 +2,12 @@
 
 ## Scenario
 
-**Ticket SOC-1058:** “An account is misbehaving, somewhere in this workspace.” The night-shift handoff provided almost no context, so my task was to locate the case note, hunt down the account, and determine whether our existing monitoring would have caught the behavior without a manual investigation.
+**SOC handoff:** “An account is misbehaving, somewhere in this workspace.” The night-shift handoff provided almost no context, so my task was to locate the case note, hunt down the account, and determine whether our existing monitoring would have caught the behavior without a manual investigation.
 
 ## Environment
 
 - **Platform:** Microsoft Azure, Mad Hat Labs (live multi-user training tenant)
-- **Scope:** `rg-madhat-lab-chap7` and Log Analytics workspace `law-madhat-lab-chap7`
+- **Scope:** a designated training resource group and Log Analytics workspace
 - **Services:** Azure Monitor, Log Analytics, Azure Activity Log, Storage diagnostic settings, Azure Monitor Alerts, Workbooks
 - **Tools:** Azure Portal and Kusto Query Language (KQL)
 - **Access:** Visibility into the provided training resources, logs, and alert settings; no remediation changes performed
@@ -17,13 +17,13 @@
 
 ### 1. THE TICKET — Orient in an unfamiliar workspace
 
-I started in the Log Analytics workspace without assuming which table contained the incident. I set the time range to include July 19, 2026 and ran a global search:
+I started in the Log Analytics workspace without assuming which table contained the incident. I set the time range to cover the incident period and searched across the workspace:
 
 ```kql
-search "SOC-1058"
+search "<ticket-id>"
 ```
 
-The query surfaced a night-shift handoff in `LabShiftHandoff_CL`, a custom table I would not have known to check first. I confirmed the ticket identifier and handoff analyst in the returned record.
+The query surfaced a night-shift handoff in an unexpected custom table. I confirmed the ticket identifier and handoff analyst in the returned record.
 
 **Conclusion:** Global search was the right starting point because it let me locate the case context before choosing a specific log source. I withheld the lab-specific case note from the public write-up.
 
@@ -66,20 +66,20 @@ The results showed repeated `50126` failures (invalid username or password), fol
 
 ### 4. THE FIRST GAP — Storage diagnostic logging removed
 
-To determine what the account might have accessed after authentication, I checked whether useful storage audit data even existed. The storage account `stmadhatlabchap7` had no diagnostic setting configured at the inspected scope. I then searched the management-plane activity logs for deletion of its diagnostic setting:
+To determine what the account might have accessed after authentication, I checked whether useful storage audit data even existed. The storage account under review had no diagnostic setting configured at the inspected scope. I then searched the management-plane activity logs for deletion of its diagnostic setting:
 
 ```kql
 AzureActivity
 | where TimeGenerated > ago(730d)
 | where OperationNameValue endswith "DIAGNOSTICSETTINGS/DELETE"
-| where _ResourceId has "stmadhatlabchap7"
-    or ResourceId has "stmadhatlabchap7"
+| where _ResourceId has "<storage-account>"
+    or ResourceId has "<storage-account>"
 | project TimeGenerated, Caller, OperationNameValue,
           ActivityStatusValue, _ResourceId, ResourceId
 | sort by TimeGenerated desc
 ```
 
-The `AzureActivity` record showed a **successful deletion** on July 19, 2026, at approximately 17:40 UTC. The diagnostic setting was named `mandated storage audit`. The caller was a separate lab identity from the suspicious sign-in account, so I did **not** attribute the deletion to that account.
+The `AzureActivity` record showed a **successful deletion** of a previously configured audit setting. I deliberately withheld its exact name and event timestamp to avoid publishing the lab answer. The caller was a separate lab identity from the suspicious sign-in account, so I did **not** attribute the deletion to that account.
 
 **Conclusion:** The deletion was proven, but its intent was not. Removing diagnostic collection is a monitoring blind spot and can be a defense-evasion technique. Without relevant storage data-plane logging, investigators may not be able to reconstruct who read the data and how during the gap. Restoring diagnostic settings later does **not** retroactively ingest events that were never collected.
 
@@ -87,21 +87,15 @@ The `AzureActivity` record showed a **successful deletion** on July 19, 2026, at
 
 ### 5. THE SECOND GAP — A detection rule too high to trigger
 
-I opened `alert-failed-signins` and read the KQL condition rather than assuming a rule with the right name would catch the pattern. Its query counted failed attempts by user, then filtered with:
-
-```kql
-| where FailedCount >= 500
-```
-
-The rule required at least **500 failed attempts** per user in its evaluation window. The suspicious burst found during the hunt was below this threshold, so the rule did not surface it. I also noticed that the visible grouping was by user, not explicitly by one-hour bins; the actual evaluation period is governed by the alert configuration, not that line of KQL.
+I opened the failed-sign-in alert and read the KQL condition rather than assuming a rule with the right name would catch the pattern. Its query counted failures by user, then filtered for counts at or above a fixed threshold. I am omitting the exact threshold because it is a lab objective. The suspicious burst found during the hunt was below this threshold, so the rule did not surface it. I also noticed that the visible grouping was by user, not explicitly by one-hour bins; the actual evaluation period is governed by the alert configuration, not that line of KQL.
 
 **Conclusion:** Logs can be present and searchable while alert logic still misses a meaningful anomaly. The missed detection was a tuning problem, not evidence that sign-in collection failed.
 
-![Log search alert condition using a 500-failure threshold](Screenshots/04-alert-threshold.png)
+*The original alert-condition screenshot is intentionally excluded because the query visibly discloses the challenge threshold.*
 
 ### 6. THE VISUAL CHECK — Confirm the gap using a workbook
 
-Finally I opened the **Sign-Ins Anomaly** workbook. Its summary displayed **1,974 total events**, including **759 failed events** and **1,215 successful events**. The time chart made the abnormal increase in failed authentication traffic visible against other users' activity, despite the missed alert.
+Finally I opened the **Sign-Ins Anomaly** workbook. Its summary contained both successful and failed authentication events, with a pronounced failure spike. The time chart made the abnormal increase in failed authentication traffic visible against other users' activity, despite the missed alert.
 
 The workbook states that its KQL intentionally distributes injected lab events across a simulated 24-hour baseline. I therefore treated the chart as a visualization of the anomaly, not as an exact reconstruction of original event timing.
 
@@ -117,7 +111,7 @@ The more consequential surprise was that there were **two different visibility f
 
 ## Findings and recommendations
 
-**Assessment:** One user showed an authentication pattern consistent with scripted password guessing followed by a successful login. Investigating post-login data access was complicated by absent storage diagnostic collection. The existing failed-sign-in alert was set at 500, above the observed burst. These findings warrant investigation and detection improvements; they do not by themselves prove exfiltration or establish the actor's identity.
+**Assessment:** One user showed an authentication pattern consistent with scripted password guessing followed by a successful login. Investigating post-login data access was complicated by absent storage diagnostic collection. The existing failed-sign-in alert used a threshold above the observed burst. These findings warrant investigation and detection improvements; they do not by themselves prove exfiltration or establish the actor's identity.
 
 1. **Restore diagnostic logging:** Re-enable the appropriate storage-service diagnostic categories and route them to the approved Log Analytics destination. Missing historical events cannot be recovered simply by turning the setting back on.
 2. **Enforce configuration with Azure Policy:** Use a deploy-if-not-exists policy for required storage diagnostic settings and track missing configurations as non-compliant, rather than leaving resources silently unmonitored.
