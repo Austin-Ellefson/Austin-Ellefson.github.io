@@ -27,7 +27,7 @@ The query surfaced a night-shift handoff in `LabShiftHandoff_CL`, a custom table
 
 **Conclusion:** Global search was the right starting point because it let me locate the case context before choosing a specific log source. I withheld the lab-specific case note from the public write-up.
 
-![SOC handoff located by a workspace-wide KQL search](Screenshots/Find-the-Anomaly/01-ticket-handoff.png)
+![SOC handoff located by a workspace-wide KQL search](Screenshots/01-ticket-handoff.png)
 
 ### 2. THE HUNT — Rank authentication failures
 
@@ -62,7 +62,7 @@ The results showed repeated `50126` failures (invalid username or password), fol
 
 **Conclusion:** This is consistent with password guessing followed by successful authentication. The records justify escalation and investigation, but cannot alone establish that the account was taken over.
 
-![Chronological sign-in activity with failures and subsequent success](Screenshots/Find-the-Anomaly/02-signin-sequence.png)
+![Chronological sign-in activity with failures and subsequent success](Screenshots/02-signin-sequence.png)
 
 ### 4. THE FIRST GAP — Storage diagnostic logging removed
 
@@ -83,7 +83,7 @@ The `AzureActivity` record showed a **successful deletion** on July 19, 2026, at
 
 **Conclusion:** The deletion was proven, but its intent was not. Removing diagnostic collection is a monitoring blind spot and can be a defense-evasion technique. Without relevant storage data-plane logging, investigators may not be able to reconstruct who read the data and how during the gap. Restoring diagnostic settings later does **not** retroactively ingest events that were never collected.
 
-![Azure Activity Log evidence of successful diagnostic-setting deletion](Screenshots/Find-the-Anomaly/03-diagnostic-deletion.png)
+![Azure Activity Log evidence of successful diagnostic-setting deletion](Screenshots/03-diagnostic-deletion.png)
 
 ### 5. THE SECOND GAP — A detection rule too high to trigger
 
@@ -97,7 +97,7 @@ The rule required at least **500 failed attempts** per user in its evaluation wi
 
 **Conclusion:** Logs can be present and searchable while alert logic still misses a meaningful anomaly. The missed detection was a tuning problem, not evidence that sign-in collection failed.
 
-![Log search alert condition using a 500-failure threshold](Screenshots/Find-the-Anomaly/04-alert-threshold.png)
+![Log search alert condition using a 500-failure threshold](Screenshots/04-alert-threshold.png)
 
 ### 6. THE VISUAL CHECK — Confirm the gap using a workbook
 
@@ -107,7 +107,7 @@ The workbook states that its KQL intentionally distributes injected lab events a
 
 **Conclusion:** The workbook gave an analyst a second detection path: manually recognizing a spike missed by threshold-based alerting. The lab generated a final sign-off value; it is redacted in the screenshot and excluded from this report.
 
-![Workbook visualizing the failed sign-in spike and event totals](Screenshots/Find-the-Anomaly/05-anomaly-workbook.png)
+![Workbook visualizing the failed sign-in spike and event totals](Screenshots/05-anomaly-workbook.png)
 
 ## What broke / what surprised me
 
