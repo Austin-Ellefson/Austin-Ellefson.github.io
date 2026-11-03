@@ -16,7 +16,7 @@ Contact: austin.ellefson3331@gmail.com · https://www.linkedin.com/in/austin-ell
 | 4 | The Friday Deploy | Pre-production Azure deployment review | [View Write-up](Azure/The-Friday-Deploy.md) |
 | 5 | Network the Operative | VNet, NSG, routing, private endpoints, private DNS | [View Write-up](Azure/Network-the-Operative.md) |
 | 6 | Bucket Looting | Storage exposure hunting | [View Write-up](Azure/Bucket-Looting.md) |
-| 7 | Find the Anomaly | Log analysis and KQL | coming, week 7 |
+| 7 | Find the Anomaly | Threat hunting, KQL, monitoring and alert gaps | [View Write-up](Azure/Find-the-Anomaly.md) |
 | 8 | Hunt the Threat | SIEM operations (Sentinel) | coming, week 8 |
 | 9 | Score the Tenant | Cloud security posture | coming, week 9 |
 | 10 | The Breach (capstone) | Full incident investigation | coming, week 10 |
